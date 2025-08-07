@@ -17,4 +17,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend  # 👈 只发布 frontend 目录
+          publish_dir: ./docs  # 👈 只发布 frontend 目录
