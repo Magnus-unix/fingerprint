@@ -1,0 +1,2 @@
+automation/camoufox_poc/.venv/lib/python3.11/site-packages/playwright/driver/node filter=lfs diff=lfs merge=lfs -text
+automation/**/.venv/** filter=lfs diff=lfs merge=lfs -text
