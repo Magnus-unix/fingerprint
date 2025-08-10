@@ -32,7 +32,7 @@
 
           const fingerprint = await getFingerprint(username);
 
-          const response = await fetch('http://123.123.123.123:8080/login', {
+          const response = await fetch('http://8.159.128.246:8080/login', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ username, password, fingerprint })
