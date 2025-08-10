@@ -45,23 +45,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-const getParameterEnums = [
-    gl.VERSION,
-    gl.VENDOR,
-    gl.RENDERER,
-    gl.SHADING_LANGUAGE_VERSION,
-    gl.MAX_TEXTURE_SIZE,
-    gl.MAX_CUBE_MAP_TEXTURE_SIZE,
-    gl.MAX_RENDERBUFFER_SIZE,
-    gl.MAX_VERTEX_ATTRIBS,
-    gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS,
-    gl.MAX_TEXTURE_IMAGE_UNITS,
-    gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS,
-    gl.MAX_FRAGMENT_UNIFORM_VECTORS,
-    gl.MAX_VERTEX_UNIFORM_VECTORS,
-    gl.MAX_VARYING_VECTORS
-];
-
 function shouldAvoidDebugRendererInfo() {
     return false; // 修改为始终允许，便于演示和调试
 }
@@ -120,14 +103,15 @@ export function getWebGLFingerprint() {
             for (_i = 0, constants_1 = constants; _i < constants_1.length; _i++) {
                 constant = constants_1[_i];
                 code = gl[constant];
-                if (typeof code === 'number' && getParameterEnums.includes(code)) {
+                if (typeof code === 'number') {
                     try {
                         value = gl.getParameter(code);
-                        parameters.push(`${constant}(${code})=${value}`);
-                    } catch (_k) {
-                        parameters.push(`${constant}(${code})=error`);
+                        parameters.push("".concat(constant, "(").concat(code, ")=").concat(value));
                     }
-                }                   
+                    catch (_k) {
+                        parameters.push("".concat(constant, "(").concat(code, ")=error"));
+                    }
+                }
             }
             supportedExtensions = gl.getSupportedExtensions() || [];
             shaderPrecisions = [];
