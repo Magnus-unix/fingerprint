@@ -16,7 +16,7 @@ export async function getFingerprint(username = '') {
 
         const fingerprint = { audio, fonts, canvas, webgl, mouse, keyboard };
 
-        const res = await fetch('http://8.159.128.246:8081/fingerprint', {
+        const res = await fetch("https://skyeker.top/fingerprint", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, fingerprint })
