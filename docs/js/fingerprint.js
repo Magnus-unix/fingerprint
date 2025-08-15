@@ -6,7 +6,8 @@ import { getMouseMovementData } from './mousemove.js';
 import { getKeyboardData } from './keyboard.js';
 import { getCookieFingerprint, getIPFingerprint } from './extra.js'; // 新增
 import { getLevelOneSignals } from './level1.js';
-
+import { getLevel2Signals } from './level2.js';
+import { getLevel3Signals } from './level3.js';
 export async function getFingerprint(username = '') {
     try {
         const cookie = getCookieFingerprint();
