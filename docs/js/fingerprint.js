@@ -5,6 +5,7 @@ import { getWebGLFingerprint } from './webgl.js';
 import { getMouseMovementData } from './mousemove.js';
 import { getKeyboardData } from './keyboard.js';
 import { getCookieFingerprint, getIPFingerprint } from './extra.js'; // 新增
+import { getLevelOneSignals } from './level1.js';
 
 export async function getFingerprint(username = '') {
     try {
@@ -16,8 +17,10 @@ export async function getFingerprint(username = '') {
         const webgl = await getWebGLFingerprint();
         const mouse = getMouseMovementData();
         const keyboard = getKeyboardData();
+        const level1Singals = getLevelOneSignals();
+        const level2Signals = await getLevel2Signals(); // 👈 新增
 
-        const fingerprint = { cookie, ip, audio, fonts, canvas, webgl, mouse, keyboard };
+        const fingerprint = { cookie, ip, audio, fonts, canvas, webgl, mouse, keyboard, level1Singals, level2Signals };
 
         const res = await fetch("https://skyeker.top/fingerprint", {
             method: 'POST',
