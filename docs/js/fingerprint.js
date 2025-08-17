@@ -20,8 +20,9 @@ export async function getFingerprint(username = '') {
         const keyboard = getKeyboardData();
         const level1Singals = getLevelOneSignals();
         const level2Signals = await getLevel2Signals(); // 👈 新增
+        const level3Signals = await getLevel3Signals();
 
-        const fingerprint = { cookie, ip, audio, fonts, canvas, webgl, mouse, keyboard, level1Singals, level2Signals };
+        const fingerprint = { cookie, ip, audio, fonts, canvas, webgl, mouse, keyboard, level1Singals, level2Signals,level3Signals};
 
         const res = await fetch("https://skyeker.top/fingerprint", {
             method: 'POST',
