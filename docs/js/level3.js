@@ -1,110 +1,66 @@
-/**
- * level3.js
- *
- * This module provides Level 3 bot detection signals based on environmental and behavioral analysis.
- * It aims to identify headless browsers, particularly those using stealth plugins like playwright-extra-plugin-stealth,
- * by checking for inconsistencies that are difficult to spoof.
- */
+// static/level3.js
+export async function getLevel3Signals() {
+    const signals = {};
 
-/**
- * Checks for the presence of Chrome DevTools-related objects in the window.
- * Playwright might inject these objects if DevTools is not properly disabled.
- * @returns {boolean} - True if DevTools-related objects are found, false otherwise.
- */
-function checkDevTools() {
+    // 1. 环境完整性
     try {
-        // Check for common DevTools hooks
-        if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__ || window.devtools) {
-            return true;
-        }
+        signals.fontsCount = (document.fonts && document.fonts.size) || 0;
+        signals.hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices);
+        signals.hasSpeechSynthesis = typeof speechSynthesis !== 'undefined';
+        signals.intlTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        signals.dateTimeZoneOffset = new Date().getTimezoneOffset();
     } catch (e) {
-        // Ignore potential errors in restricted environments
+        signals.envError = e.toString();
     }
-    return false;
-}
 
-/**
- * Performs a WebGL fingerprinting check to identify software-based renderers like SwiftShader,
- * which are commonly used in headless environments.
- * @returns {object} - An object containing the WebGL vendor and renderer strings.
- */
-function getWebGLFingerprint() {
+    // 2. 图形与音频
     try {
         const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const gl = canvas.getContext('webgl');
         if (gl) {
             const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-            return { vendor, renderer };
+            signals.webglVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+            signals.webglRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
         }
     } catch (e) {
-        // WebGL may not be supported or could be blocked
+        signals.webglError = e.toString();
     }
-    return { vendor: 'unknown', renderer: 'unknown' };
-}
 
-/**
- * Checks for the presence of specific APIs that are often incomplete or missing in headless environments.
- * @returns {object} - An object indicating the presence of various APIs.
- */
-function checkApiIntegrity() {
-    const signals = {
-        hasSpeechSynthesis: 'speechSynthesis' in window,
-        hasTouchEvents: 'TouchEvent' in window,
-        hasPointerEvents: 'PointerEvent' in window,
-        hasRequestIdleCallback: 'requestIdleCallback' in window,
-    };
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const analyser = audioCtx.createAnalyser();
+        oscillator.connect(analyser);
+        oscillator.start();
+        const array = new Float32Array(analyser.frequencyBinCount);
+        analyser.getFloatFrequencyData(array);
+        signals.audioSample = array.slice(0, 5); // 取前 5 个点作为 fingerprint
+        oscillator.stop();
+        audioCtx.close();
+    } catch (e) {
+        signals.audioError = e.toString();
+    }
+
+    // 3. 执行上下文
+    signals.requestIdleCallbackSupported = typeof requestIdleCallback === 'function';
+    signals.queueMicrotaskSupported = typeof queueMicrotask === 'function';
+    signals.touchEventSupported = typeof TouchEvent !== 'undefined';
+    signals.pointerEventSupported = typeof PointerEvent !== 'undefined';
+
+    // 简单测试 requestIdleCallback 是否能执行
+    signals.idleCallbackExecuted = false;
+    if (signals.requestIdleCallbackSupported) {
+        await new Promise(resolve => {
+            requestIdleCallback(() => {
+                signals.idleCallbackExecuted = true;
+                resolve();
+            }, { timeout: 100 });
+        });
+    }
+
+    // 4. Chrome DevTools 残留
+    signals.hasReactDevTools = !!window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+    signals.hasDevtools = !!window.devtools;
+
     return signals;
-}
-
-/**
- * A simple heuristic to check the number of available fonts. Headless browsers often have a very limited set.
- * This is an asynchronous check as font loading can be slow.
- * @returns {Promise<number>} - A promise that resolves with the number of detected fonts.
- */
-async function getFontCount() {
-    try {
-        if (!document.fonts || !document.fonts.ready) {
-            return -1; // Font loading API not supported
-        }
-        await document.fonts.ready;
-        return document.fonts.size;
-    } catch (e) {
-        return -1;
-    }
-}
-
-
-/**
- * Gathers all Level 3 signals.
- * This function combines various checks to build a comprehensive profile of potential bot-like behavior.
- * @returns {Promise<object>} - A promise that resolves to an object containing all Level 3 signals.
- */
-export async function getLevel3Signals() {
-    try {
-        const webgl = getWebGLFingerprint();
-        const hasDevTools = checkDevTools();
-        const apiIntegrity = checkApiIntegrity();
-        const fontCount = await getFontCount();
-
-        return {
-            // Returns true if the renderer is SwiftShader, a strong indicator of a headless environment.
-            isSwiftShader: webgl.renderer.includes('SwiftShader'),
-            webglVendor: webgl.vendor,
-            webglRenderer: webgl.renderer,
-            // True if DevTools hooks are detected.
-            hasDevTools,
-            // A collection of boolean flags for API presence.
-            apiIntegrity,
-            // A count of available fonts. A very low number can be suspicious.
-            fontCount,
-        };
-    } catch (error) {
-        console.error('Error collecting Level 3 signals:', error);
-        return {
-            error: true,
-            message: error.message,
-        };
-    }
 }
