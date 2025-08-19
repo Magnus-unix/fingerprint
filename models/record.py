@@ -7,3 +7,5 @@ class LoginRecord(db.Model):
     username = db.Column(db.String(64))
     fingerprint = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    ip = db.Column(db.String(64))        # 新增
+    cookie = db.Column(db.Text)
