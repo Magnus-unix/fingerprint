@@ -16,13 +16,21 @@ def collect_fingerprint():
     if not username:
         return jsonify({'success': False, 'message': '用户名缺失'}), 400
 
-    # ✅ 将 fingerprint 原样存入数据库
+    # 获取用户真实 IP（优先 X-Forwarded-For，否则 remote_addr）
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    # 获取 cookie（如果是跨域 fetch，要确认 credentials: 'include'）
+    cookie = request.headers.get("Cookie", "")
+
     record = LoginRecord(
         username=username,
-        fingerprint=json.dumps(fingerprint, ensure_ascii=False),  # 原始 JSON 字符串化
+        fingerprint=json.dumps(fingerprint, ensure_ascii=False),
+        ip=ip,
+        cookie=cookie,
         timestamp=datetime.utcnow()
     )
     db.session.add(record)
     db.session.commit()
 
     return jsonify({'success': True})
+

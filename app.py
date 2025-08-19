@@ -4,17 +4,17 @@ from extensions import db
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(__name__)
-    
+    app.config.from_object('config')  # ✅ 确保加载 config.py
+
     db.init_app(app)
 
-    # 注册蓝图和模型（注意：模型导入要放在 init_app 之后）
+    # 注册蓝图
     from routes.login import login_bp
     app.register_blueprint(login_bp)
 
+    # ✅ 只在数据库为空时初始化，而不是每次都 drop_all
     with app.app_context():
-        db.drop_all()
-        db.create_all()
+        db.create_all()  # 如果表不存在会自动创建，不会覆盖已有数据
 
     return app
 
