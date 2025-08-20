@@ -1,13 +1,14 @@
 from flask import Flask
 from config import *
 from extensions import db
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object('config')  # ✅ 确保加载 config.py
 
     db.init_app(app)
-
+    CORS(app, resources={r"/*": {"origins": "https://magnus-unix.github.io"}})
     # 注册蓝图
     from routes.login import login_bp
     app.register_blueprint(login_bp)

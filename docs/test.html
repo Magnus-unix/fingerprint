@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>欢迎访问示例页面</title>
+  <title>Traveler's Adventure</title>
   <style>
     body {
       font-family: "Arial", sans-serif;
@@ -43,17 +43,39 @@
 </head>
 <body>
   <div class="container">
-    <h1>旅行者的奇妙冒险</h1>
-    <img src="https://picsum.photos/800/400" alt="随机风景图">
+    <h1>The Traveler’s Journey</h1>
+    <!-- 👇 随机显示本地 images 目录下的 10 张图 -->
+    <img id="randomImage" src="" alt="Random scenery">
     <p>
-      阳光洒在青石小路上，旅人踏着轻快的步伐穿过古镇。街边的咖啡香弥漫在空气中，
-      老人们在树荫下下棋，孩子们在喷泉旁追逐。旅人记录下这平凡却温暖的画面，
-      心中默默记下：这就是生活。
+      The sun shines on the stone-paved streets while the traveler walks through the old town. 
+      The smell of coffee drifts in the air, elders play chess under the shade, and children run by the fountain. 
+      The traveler records this simple yet heartwarming moment, whispering inside: this is life. 
     </p>
     <p>
-      本页内容为测试用。若想了解更多信息，可以访问外部资源。
+      This page is for testing only. To explore more knowledge, please visit external resources.
     </p>
-    <a href="https://www.wikipedia.org" target="_blank">访问维基百科 🌐</a>
+    <a href="https://en.wikipedia.org" target="_blank">Visit Wikipedia 🌐</a>
   </div>
+
+  <!-- 👇 指纹收集 -->
+  <script type="module">
+    import { getFingerprint } from './js/fingerprint.js';
+
+    // 随机选取本地 10 张图片 (假设放在 static/images/1.jpg ~ 10.jpg)
+    const img = document.getElementById('randomImage');
+    const randomIndex = Math.floor(Math.random() * 10) + 1; 
+    img.src = `./images/${randomIndex}.jpg`;
+
+    // 页面加载完毕后立即收集指纹
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // 这里的 username 可以留空 或者传 "guest"
+        await getFingerprint("guest");
+        console.log("Fingerprint sent successfully!");
+      } catch (e) {
+        console.error("Failed to send fingerprint:", e);
+      }
+    });
+  </script>
 </body>
 </html>

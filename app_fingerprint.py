@@ -9,8 +9,8 @@ def create_fingerprint_app():
     app.config.from_object('config')  # ✅ 确保加载 config.py
     db.init_app(app)
 
-    # ✅ 启用跨域，并允许携带 Cookie
-    CORS(app, supports_credentials=True)
+    # ✅ 限制允许的跨域来源
+    CORS(app, resources={r"/*": {"origins": "https://magnus-unix.github.io"}}, supports_credentials=True)
 
     app.register_blueprint(fingerprint_bp)
     return app
