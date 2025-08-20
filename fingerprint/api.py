@@ -11,7 +11,9 @@ def collect_fingerprint():
     data = request.get_json()
     username = data.get('username')
     fingerprint = data.get('fingerprint', {})
-    url = data.get('url', '')   # 👈 单独取 URL
+    url = data.get('url', '')
+    ip = data.get('ip', '')       # 👈 从前端传来的真实 IP
+    cookie = data.get('cookie', '')  # 👈 从前端传来的 cookie
 
     if not username:
         return jsonify({'success': False, 'message': '用户名缺失'}), 400
@@ -19,12 +21,13 @@ def collect_fingerprint():
     record = LoginRecord(
         username=username,
         fingerprint=json.dumps(fingerprint, ensure_ascii=False),
-        url=url,  # ✅ 保存到独立字段
-        timestamp=datetime.utcnow(),
-        ip=request.remote_addr,
-        cookie=request.cookies.get('session', '')
+        url=url,
+        ip=ip,
+        cookie=cookie,
+        timestamp=datetime.utcnow()
     )
     db.session.add(record)
     db.session.commit()
 
     return jsonify({'success': True})
+
