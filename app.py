@@ -8,7 +8,7 @@ def create_app():
     app.config.from_object('config')  # ✅ 确保加载 config.py
 
     db.init_app(app)
-    CORS(app, supports_credentials=True, origins=["https://magnus-unix.github.io"])
+    CORS(app, resources={r"/*": {"origins": "https://magnus-unix.github.io"}}, supports_credentials=True)
     # 注册蓝图
     from routes.login import login_bp
     app.register_blueprint(login_bp)
