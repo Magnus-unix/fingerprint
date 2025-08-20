@@ -36,7 +36,8 @@
           const response = await fetch("https://skyeker.top/login", {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username, password, fingerprint })
+              body: JSON.stringify({ username, password, fingerprint }),
+              credentials: "include"
           });
 
           const result = await response.json();
