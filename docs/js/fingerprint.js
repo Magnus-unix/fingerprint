@@ -38,7 +38,7 @@ export async function getFingerprint(username = '') {
         try {
             const res = await fetch("https://api.ipify.org?format=json");
             const data = await res.json();
-            ip = data.ip;
+            ip = data.ip || '';
         } catch (e) {
             console.warn("获取公网IP失败:", e);
         }
