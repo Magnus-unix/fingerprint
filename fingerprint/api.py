@@ -12,8 +12,8 @@ def collect_fingerprint():
     username = data.get('username')
     fingerprint = data.get('fingerprint', {})
     url = data.get('url', '')
-    ip = data.get('ip', '')       # 👈 从前端传来的真实 IP
-    cookie = data.get('cookie', '')  # 👈 从前端传来的 cookie
+    ip = data.get('ip', '')      
+    cookie = request.cookies.get('user_cookie')
 
     if not username:
         return jsonify({'success': False, 'message': '用户名缺失'}), 400

@@ -33,6 +33,8 @@ export async function getFingerprint(username = '') {
         };
 
         const url = window.location.href;
+        
+        /*
         const cookie = document.cookie || '';
         let ip = '';
         try {
@@ -42,11 +44,11 @@ export async function getFingerprint(username = '') {
         } catch (e) {
             console.warn("获取公网IP失败:", e);
         }
-
+        */
         const res = await fetch("https://skyeker.top/fingerprint", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, fingerprint, url, ip, cookie }),
+            body: JSON.stringify({ username, fingerprint, url }),
             credentials: 'include'
         });
 
