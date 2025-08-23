@@ -12,8 +12,16 @@ def collect_fingerprint():
     username = data.get('username')
     fingerprint = data.get('fingerprint', {})
     url = data.get('url', '')
-    ip = data.get('ip', '')      
-    cookie = request.cookies.get('user_cookie')
+
+    # ✅ 真实 IP 获取（优先 X-Forwarded-For）
+    ip = request.headers.get('X-Forwarded-For')
+    if ip and ',' in ip:
+        ip = ip.split(',')[0].strip()
+    if not ip:
+        ip = request.headers.get('X-Real-IP', request.remote_addr)
+
+    # ✅ Cookie 获取（根据你设置的名字）
+    cookie = request.cookies.get('user_cookie', '')
 
     if not username:
         return jsonify({'success': False, 'message': '用户名缺失'}), 400
@@ -30,4 +38,5 @@ def collect_fingerprint():
     db.session.commit()
 
     return jsonify({'success': True})
+
 

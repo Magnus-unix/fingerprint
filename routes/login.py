@@ -2,7 +2,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, jsonif
 from models.user import User
 from models.record import LoginRecord
 from extensions import db
-import json, uuid
+import json
 from datetime import datetime
 
 login_bp = Blueprint('login', __name__)
@@ -41,17 +41,14 @@ def login():
     # 登录成功时设置 cookie，有效期 30 天
     if success:
         max_age = 30 * 24 * 60 * 60  # 30 天，单位是秒
-        value = str(uuid.uuid4())
         resp.set_cookie(
-            'user_cookie',         # cookie 名称
-            username,           # cookie 值
-            value,              # session_id
-            max_age,    # 有效期
-            secure=True,        # 确保只在 HTTPS 下传输
-            httponly=True,      # 防 JS 访问
-            samesite='None'      # CSRF 防护，可改为 'Strict' 或 'None'
+            key='user_cookie',
+            value=username,
+            max_age=30*24*60*60,
+            secure=True,
+            httponly=True,
+            samesite='None'
         )
-
     return resp
 
 @login_bp.route('/login', methods=['GET'])
