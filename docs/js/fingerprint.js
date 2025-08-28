@@ -19,7 +19,13 @@ export async function getFingerprint(username = '') {
         const audio = await getAudioFingerprint();
         const fonts = await getFontsFingerprint();
         const canvas = await getCanvasFingerprint();
-        const webgl = await getWebGLFingerprint();
+        let webgl;
+        try {
+            webgl = await getWebGLFingerprint();
+        } catch (e) {
+            console.warn('WebGL fingerprint failed:', e);
+            webgl = { supported: false, error: e.message || 'webgl_error' };
+        }
         const mouse = getMouseMovementData();
         const keyboard = getKeyboardData();
         const level1Signals = getLevelOneSignals();
