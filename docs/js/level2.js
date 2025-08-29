@@ -1,4 +1,7 @@
 // static/level2.js
+import { getCanvasFingerprint } from './canvas.js';
+import { getWebGLFingerprint } from './webgl.js';
+
 export async function getLevel2Signals() {
     const signals = {};
 
@@ -13,14 +16,20 @@ export async function getLevel2Signals() {
 
     // WebGL GPU 信息
     try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        signals.gpuVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-        signals.gpuRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        const canvasData = await getCanvasFingerprint();
+        signals.canvasHash = canvasData.hash || 'unknown'; 
     } catch (e) {
-        signals.gpuVendor = 'unknown';
-        signals.gpuRenderer = 'unknown';
+        signals.canvasHash = 'error';
+    }
+
+    // ✅ WebGL
+    try {
+        const webglData = await getWebGLFingerprint();
+        signals.gpuVendor = webglData.vendor || 'unknown';
+        signals.gpuRenderer = webglData.renderer || 'unknown';
+    } catch (e) {
+        signals.gpuVendor = 'error';
+        signals.gpuRenderer = 'error';
     }
 
     // Permissions API
