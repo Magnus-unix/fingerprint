@@ -14,22 +14,17 @@ export async function getLevel2Signals() {
     signals.uaPlatformMismatch = (signals.userAgent.includes("Windows") && signals.platform.toLowerCase().includes("linux")) ||
                                  (signals.userAgent.includes("Mac") && signals.platform.toLowerCase().includes("win"));
 
-    // WebGL GPU 信息
-    try {
-        const canvasData = await getCanvasFingerprint();
-        signals.canvasHash = canvasData.hash || 'unknown'; 
-    } catch (e) {
-        signals.canvasHash = 'error';
-    }
-
     // ✅ WebGL
     try {
-        const webglData = await getWebGLFingerprint();
-        signals.gpuVendor = webglData.vendor || 'unknown';
-        signals.gpuRenderer = webglData.renderer || 'unknown';
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            signals.webglVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+            signals.webglRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        }
     } catch (e) {
-        signals.gpuVendor = 'error';
-        signals.gpuRenderer = 'error';
+        signals.webglError = e.toString();
     }
 
     // Permissions API
