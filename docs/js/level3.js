@@ -1,4 +1,57 @@
 // static/level3.js
+// static/level3.js (audio 部分改进)
+
+async function getAudioFingerprint() {
+    try {
+        // 使用 OfflineAudioContext 生成离线音频数据
+        const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        if (!OfflineCtx) {
+            return { error: "OfflineAudioContext not supported" };
+        }
+
+        // 参数: 1 个声道, 5000 采样点, 采样率 44100Hz
+        const context = new OfflineCtx(1, 5000, 44100);
+
+        // 创建振荡器 (OscillatorNode) 作为信号源
+        const oscillator = context.createOscillator();
+        oscillator.type = "sine";   // 正弦波
+        oscillator.frequency.value = 1000; // 频率 1kHz
+
+        // 创建滤波器 (BiquadFilterNode)
+        const filter = context.createBiquadFilter();
+        filter.type = "lowpass"; // 低通滤波器
+        filter.frequency.value = 1500;
+
+        // 链接音频图：oscillator -> filter -> destination
+        oscillator.connect(filter);
+        filter.connect(context.destination);
+
+        oscillator.start(0);
+
+        // 渲染离线音频
+        const buffer = await context.startRendering();
+
+        // 取出前 10 个采样点作为 fingerprint
+        const channelData = buffer.getChannelData(0);
+        const sample = Array.from(channelData.slice(0, 10));
+
+        // 简单计算「抖动特征」: 相邻差值方差
+        let diffs = [];
+        for (let i = 1; i < sample.length; i++) {
+            diffs.push(sample[i] - sample[i - 1]);
+        }
+        const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+        const variance = diffs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / diffs.length;
+
+        return {
+            sample: sample.map(v => Number(v.toFixed(6))), // 固定精度
+            jitterVariance: Number(variance.toFixed(8)),   // 抖动方差
+        };
+    } catch (e) {
+        return { error: e.toString() };
+    }
+}
+
 export async function getLevel3Signals() {
     const signals = {};
 
@@ -27,16 +80,9 @@ export async function getLevel3Signals() {
     }
 
     try {
-        const audioCtx = new (window.AudioContext || window.OfflineAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const analyser = audioCtx.createAnalyser();
-        oscillator.connect(analyser);
-        oscillator.start();
-        const array = new Float32Array(analyser.frequencyBinCount);
-        analyser.getFloatFrequencyData(array);
-        signals.audioSample = array.slice(0, 5); // 取前 5 个点作为 fingerprint
-        oscillator.stop();
-        audioCtx.close();
+        const audioData = await getAudioFingerprint();
+        signals.audioSample = audioData.sample || [];
+        signals.audioJitterVar = audioData.jitterVariance || 0;
     } catch (e) {
         signals.audioError = e.toString();
     }
