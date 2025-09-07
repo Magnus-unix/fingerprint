@@ -27,7 +27,7 @@ export async function getLevel3Signals() {
     }
 
     try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || window.OfflineAudioContext)();
         const oscillator = audioCtx.createOscillator();
         const analyser = audioCtx.createAnalyser();
         oscillator.connect(analyser);
