@@ -1,21 +1,4 @@
 // static/level3.js
-import { getFontsFingerprint } from './fonts.js';
-import { getWebGLFingerprint } from './webgl.js';
-import { getCanvasFingerprint } from './canvas.js';
-import { getAudioFingerprint } from './audio.js';
-
-function average(arr) {
-    if (!arr || arr.length === 0) return 0;
-    return arr.reduce((a, b) => a + b, 0) / arr.length;
-}
-
-function stddev(arr) {
-    if (!arr || arr.length === 0) return 0;
-    const avg = average(arr);
-    const variance = arr.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / arr.length;
-    return Math.sqrt(variance);
-}
-
 export async function getLevel3Signals() {
     const signals = {};
 
@@ -44,10 +27,16 @@ export async function getLevel3Signals() {
     }
 
     try {
-        const audioData = await getAudioFingerprint();
-        signals.audioSample = audioData.sample ? audioData.sample.slice(0, 10) : [];
-        signals.audioMean = average(signals.audioSample);
-        signals.audioStd = stddev(signals.audioSample);
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const analyser = audioCtx.createAnalyser();
+        oscillator.connect(analyser);
+        oscillator.start();
+        const array = new Float32Array(analyser.frequencyBinCount);
+        analyser.getFloatFrequencyData(array);
+        signals.audioSample = array.slice(0, 5); // 取前 5 个点作为 fingerprint
+        oscillator.stop();
+        audioCtx.close();
     } catch (e) {
         signals.audioError = e.toString();
     }
