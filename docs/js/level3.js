@@ -87,6 +87,41 @@ export async function getLevel3Signals() {
         signals.audioError = e.toString();
     }
 
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+            const ctx = new AudioCtx();
+            const oscillator = ctx.createOscillator();
+            const analyser = ctx.createAnalyser();
+            oscillator.type = "sine";
+            oscillator.frequency.value = 440;
+            oscillator.connect(analyser);
+            analyser.connect(ctx.destination);
+            oscillator.start();
+
+            const array = new Float32Array(analyser.frequencyBinCount);
+            analyser.getFloatFrequencyData(array);
+            signals.realtimeAudioSample = Array.from(array.slice(0, 5));
+
+            // 计算抖动方差
+            const diffs = [];
+            for (let i = 1; i < 5; i++) {
+                diffs.push(array[i] - array[i - 1]);
+            }
+            const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+            const variance = diffs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / diffs.length;
+            signals.realtimeAudioJitterVar = variance;
+
+            oscillator.stop();
+            ctx.close();
+        } else {
+            signals.realtimeAudioSample = "unsupported";
+            signals.realtimeAudioJitterVar = null;
+        }
+    } catch (e) {
+        signals.realtimeAudioError = e.toString();
+    }
+    
     // 3. 执行上下文
     signals.requestIdleCallbackSupported = typeof requestIdleCallback === 'function';
     signals.queueMicrotaskSupported = typeof queueMicrotask === 'function';
