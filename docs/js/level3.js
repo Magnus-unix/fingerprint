@@ -4,7 +4,7 @@
 async function getAudioFingerprint() {
     try {
         // 使用 OfflineAudioContext 生成离线音频数据
-        const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        const OfflineCtx = window.OfflineAudioContext || window.AudioContext;
         if (!OfflineCtx) {
             return { error: "OfflineAudioContext not supported" };
         }
