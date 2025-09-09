@@ -52,25 +52,34 @@ async function getAudioFingerprint() {
     }
 }
 
-async function getRealtimeAudioFingerprint() {
+export async function getRealtimeAudioFingerprint() {
     try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return { sample: null, jitterVar: null, error: "unsupported" };
 
         const ctx = new AudioCtx();
+
+        // ⚡ 关键：如果状态是 suspended，尝试 resume
+        if (ctx.state === "suspended") {
+            try {
+                await ctx.resume();
+            } catch (e) {
+                return { sample: null, jitterVar: null, error: "resume_failed" };
+            }
+        }
+
         const oscillator = ctx.createOscillator();
         const analyser = ctx.createAnalyser();
 
-        // 配置
-        analyser.fftSize = 2048; // 默认是 2048，越大频率分辨率越高
+        analyser.fftSize = 2048;
         oscillator.type = "sine";
-        oscillator.frequency.value = 440; // A4 音
+        oscillator.frequency.value = 440;
 
         oscillator.connect(analyser);
         analyser.connect(ctx.destination);
         oscillator.start();
 
-        // 等待一段时间，确保缓冲区有数据
+        // 等待一段时间采样
         await new Promise(resolve => setTimeout(resolve, 200));
 
         const array = new Float32Array(analyser.frequencyBinCount);
@@ -89,15 +98,13 @@ async function getRealtimeAudioFingerprint() {
         oscillator.stop();
         ctx.close();
 
-        return {
-            sample,
-            jitterVar: variance
-        };
+        return { sample, jitterVar: variance };
 
     } catch (e) {
         return { sample: null, jitterVar: null, error: e.toString() };
     }
 }
+
 
 export async function getLevel3Signals() {
     const signals = {};
