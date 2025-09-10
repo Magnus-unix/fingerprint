@@ -52,26 +52,21 @@ async function getAudioFingerprint() {
     }
 }
 
-let audioReady = false;
-let audioResult = null;
-
-export async function getRealtimeAudioFingerprint() {
-    if (audioReady) return audioResult; // 已经测过就直接返回
-
+export async function getRealtimeAudioFingerprint(timeoutMs = 10000) {
     return new Promise(resolve => {
-        function init() {
-            document.removeEventListener("click", init);
-            document.removeEventListener("keydown", init);
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) {
+            resolve({ sample: null, jitterVar: null, error: "unsupported" });
+            return;
+        }
 
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (!AudioCtx) {
-                resolve({ sample: null, jitterVar: null, error: "unsupported" });
-                return;
-            }
+        let resolved = false;
 
-            const ctx = new AudioCtx();
+        async function run() {
+            try {
+                const ctx = new AudioCtx();
+                await ctx.resume(); // 交互后可以正常 resume
 
-            ctx.resume().then(async () => {
                 const oscillator = ctx.createOscillator();
                 const analyser = ctx.createAnalyser();
 
@@ -83,13 +78,14 @@ export async function getRealtimeAudioFingerprint() {
                 analyser.connect(ctx.destination);
                 oscillator.start();
 
+                // 等待缓冲
                 await new Promise(r => setTimeout(r, 200));
 
                 const array = new Float32Array(analyser.frequencyBinCount);
                 analyser.getFloatFrequencyData(array);
-
                 const sample = Array.from(array.slice(0, 5));
 
+                // jitter 方差
                 const diffs = [];
                 for (let i = 1; i < 5; i++) {
                     diffs.push(array[i] - array[i - 1]);
@@ -100,20 +96,41 @@ export async function getRealtimeAudioFingerprint() {
                 oscillator.stop();
                 ctx.close();
 
-                audioResult = { sample, jitterVar: variance };
-                audioReady = true;
-                resolve(audioResult);
-            }).catch(e => {
-                resolve({ sample: null, jitterVar: null, error: e.toString() });
-            });
+                if (!resolved) {
+                    resolved = true;
+                    resolve({ sample, jitterVar: variance });
+                }
+            } catch (e) {
+                if (!resolved) {
+                    resolved = true;
+                    resolve({ sample: null, jitterVar: null, error: e.toString() });
+                }
+            }
         }
 
-        // 等待用户点击或按键
-        document.addEventListener("click", init);
-        document.addEventListener("keydown", init);
+        // 绑定用户交互
+        const handler = () => {
+            if (!resolved) {
+                document.removeEventListener("click", handler);
+                document.removeEventListener("keydown", handler);
+                document.removeEventListener("touchstart", handler);
+                run();
+            }
+        };
+
+        document.addEventListener("click", handler, { once: true });
+        document.addEventListener("keydown", handler, { once: true });
+        document.addEventListener("touchstart", handler, { once: true });
+
+        // 超时处理
+        setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                resolve({ sample: null, jitterVar: null, error: "no interaction within timeout" });
+            }
+        }, timeoutMs);
     });
 }
-
 
 export async function getLevel3Signals() {
     const signals = {};
