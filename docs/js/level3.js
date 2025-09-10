@@ -52,57 +52,66 @@ async function getAudioFingerprint() {
     }
 }
 
+let audioReady = false;
+let audioResult = null;
+
 export async function getRealtimeAudioFingerprint() {
-    try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return { sample: null, jitterVar: null, error: "unsupported" };
+    if (audioReady) return audioResult; // 已经测过就直接返回
 
-        const ctx = new AudioCtx();
+    return new Promise(resolve => {
+        function init() {
+            document.removeEventListener("click", init);
+            document.removeEventListener("keydown", init);
 
-        // ⚡ 关键：如果状态是 suspended，尝试 resume
-        if (ctx.state === "suspended") {
-            try {
-                await ctx.resume();
-            } catch (e) {
-                return { sample: null, jitterVar: null, error: "resume_failed" };
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) {
+                resolve({ sample: null, jitterVar: null, error: "unsupported" });
+                return;
             }
+
+            const ctx = new AudioCtx();
+
+            ctx.resume().then(async () => {
+                const oscillator = ctx.createOscillator();
+                const analyser = ctx.createAnalyser();
+
+                analyser.fftSize = 2048;
+                oscillator.type = "sine";
+                oscillator.frequency.value = 440;
+
+                oscillator.connect(analyser);
+                analyser.connect(ctx.destination);
+                oscillator.start();
+
+                await new Promise(r => setTimeout(r, 200));
+
+                const array = new Float32Array(analyser.frequencyBinCount);
+                analyser.getFloatFrequencyData(array);
+
+                const sample = Array.from(array.slice(0, 5));
+
+                const diffs = [];
+                for (let i = 1; i < 5; i++) {
+                    diffs.push(array[i] - array[i - 1]);
+                }
+                const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+                const variance = diffs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / diffs.length;
+
+                oscillator.stop();
+                ctx.close();
+
+                audioResult = { sample, jitterVar: variance };
+                audioReady = true;
+                resolve(audioResult);
+            }).catch(e => {
+                resolve({ sample: null, jitterVar: null, error: e.toString() });
+            });
         }
 
-        const oscillator = ctx.createOscillator();
-        const analyser = ctx.createAnalyser();
-
-        analyser.fftSize = 2048;
-        oscillator.type = "sine";
-        oscillator.frequency.value = 440;
-
-        oscillator.connect(analyser);
-        analyser.connect(ctx.destination);
-        oscillator.start();
-
-        // 等待一段时间采样
-        await new Promise(resolve => setTimeout(resolve, 200));
-
-        const array = new Float32Array(analyser.frequencyBinCount);
-        analyser.getFloatFrequencyData(array);
-
-        const sample = Array.from(array.slice(0, 5));
-
-        // 计算 jitter 方差
-        const diffs = [];
-        for (let i = 1; i < 5; i++) {
-            diffs.push(array[i] - array[i - 1]);
-        }
-        const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
-        const variance = diffs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / diffs.length;
-
-        oscillator.stop();
-        ctx.close();
-
-        return { sample, jitterVar: variance };
-
-    } catch (e) {
-        return { sample: null, jitterVar: null, error: e.toString() };
-    }
+        // 等待用户点击或按键
+        document.addEventListener("click", init);
+        document.addEventListener("keydown", init);
+    });
 }
 
 
