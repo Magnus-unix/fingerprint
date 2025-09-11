@@ -138,7 +138,14 @@ export async function getLevel3Signals() {
 
     // 1. 环境完整性
     try {
-        signals.fontsCount = (document.fonts && document.fonts.size) || 0;
+        const availableFonts = await getFontsFingerprint();
+        signals.fontsCount = availableFonts.length;
+        //signals.fontsList = availableFonts; // 如果要看具体字体，可以加上
+    } catch (e) {
+        signals.fontsError = e.toString();
+    }
+
+    try {
         signals.hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices);
         signals.hasSpeechSynthesis = typeof speechSynthesis !== 'undefined';
         signals.intlTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
