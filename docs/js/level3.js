@@ -1,5 +1,6 @@
 // static/level3.js
 // static/level3.js (audio 部分改进)
+import { getWebGLFingerprint } from './webgl.js';
 
 async function getAudioFingerprint() {
     try {
@@ -148,15 +149,12 @@ export async function getLevel3Signals() {
 
     // 2. 图形与音频
     try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl');
-        if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            signals.webglVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-            signals.webglRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-        }
+        const webglData = await getWebGLFingerprint();
+        signals.gpuVendor = webglData.vendorUnmasked || webglData.vendor || "unknown";
+        signals.gpuRenderer = webglData.rendererUnmasked || webglData.renderer || "unknown";
     } catch (e) {
-        signals.webglError = e.toString();
+        signals.gpuVendor = "error";
+        signals.gpuRenderer = "error";
     }
 
     try {
