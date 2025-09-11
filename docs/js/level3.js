@@ -1,6 +1,7 @@
 // static/level3.js
 // static/level3.js (audio 部分改进)
 import { getWebGLFingerprint } from './webgl.js';
+import { getFontsFingerprint } from './fonts.js';
 
 async function getAudioFingerprint() {
     try {
