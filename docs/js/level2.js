@@ -16,17 +16,14 @@ export async function getLevel2Signals() {
 
     // ✅ WebGL
     try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl');
-        if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            signals.webglVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-            signals.webglRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-        }
+        const webglData = await getWebGLFingerprint();
+        signals.gpuVendor = webglData.vendorUnmasked || webglData.vendor || "unknown";
+        signals.gpuRenderer = webglData.rendererUnmasked || webglData.renderer || "unknown";
     } catch (e) {
-        signals.webglError = e.toString();
+        signals.gpuVendor = "error";
+        signals.gpuRenderer = "error";
     }
-
+    
     // Permissions API
     try {
         const perm = await navigator.permissions.query({name: 'notifications'});

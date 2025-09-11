@@ -12,6 +12,12 @@ def json_to_excel(json_file, excel_file):
     rows = []
     for record in data:
         row = {}
+        try:
+            rid = int(record.get("id", 0))  # 强制转成整数
+        except ValueError:
+            continue
+        if rid < 239:
+            continue
 
         # 基础字段
         row["username"] = record.get("username")
