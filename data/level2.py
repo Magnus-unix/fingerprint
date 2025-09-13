@@ -10,8 +10,8 @@ def analyze_level2(excel_file):
     for _, row in df.iterrows():
         ua = str(row.get("level2_userAgent", "") or "")
         platform = str(row.get("level2_platform", "") or "").lower()
-        gpu_vendor = str(row.get("level2_gpuVendor", "") or "").lower()
-        gpu_renderer = str(row.get("level2_gpuRenderer", "") or "").lower()
+        gpu_vendor = str(row.get("level2_webglVendor", "") or "").lower()
+        gpu_renderer = str(row.get("level2_webglRenderer", "") or "").lower()
         notification_permission = str(row.get("level2_notificationPermission", "") or "")
         has_chrome_app = bool(row.get("level2_hasChromeApp", False))
         has_chrome_runtime = bool(row.get("level2_hasChromeRuntime", False))
@@ -51,7 +51,7 @@ def analyze_level2(excel_file):
             reasons.append("notification permission error")
 
         # 4. Chrome 内部属性异常
-        if "chrome" in ua.lower() and (not has_chrome_app or not has_chrome_runtime):
+        if not has_chrome_runtime and "chrome" in ua.lower() :
             is_bot = True
             reasons.append("Chrome runtime inconsistency")
 

@@ -32,9 +32,9 @@ def analyze_level1(excel_file):
 
         # Chrome 检查
         ua = str(row.get("level1_userAgent", "") or "")
-        has_chrome = row.get("level1_hasChrome", False)
+        #has_chrome = row.get("level1_hasChrome", False)
         has_runtime = row.get("level1_hasChromeRuntime", False)
-        if "Chrome" in ua and (not has_chrome or not has_runtime):
+        if not has_runtime and "chrome" in ua.lower():
             is_bot = True
             reasons.append("UA contains Chrome but chrome flags missing")
 
