@@ -7,6 +7,7 @@ import { getKeyboardData } from './keyboard.js';
 import { getLevelOneSignals } from './level1.js';
 import { getLevel2Signals } from './level2.js';
 import { getLevel3Signals } from './level3.js';
+import { markStartTime, markEndTime } from "./timing.js";
 
 function getBeijingTime() {
     return new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
@@ -14,7 +15,7 @@ function getBeijingTime() {
 
 export async function getFingerprint(username = '') {
     try {
-        const startTime = getBeijingTime();
+        markStartTime();
 
         const audio = await getAudioFingerprint();
         const fonts = await getFontsFingerprint();
@@ -32,8 +33,8 @@ export async function getFingerprint(username = '') {
         const level2Signals = await getLevel2Signals();
         const level3Signals = await getLevel3Signals();
 
-        const endTime = getBeijingTime();
-
+        const timing = markEndTime();
+        const duration = timing.duration;
         const fingerprint = {
             audio,
             fonts,
@@ -44,8 +45,7 @@ export async function getFingerprint(username = '') {
             level1Signals,
             level2Signals,
             level3Signals,
-            startTime,   // 👈 新增
-            endTime      // 👈 新增
+            duration
         };
 
         const url = window.location.href;

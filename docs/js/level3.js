@@ -54,7 +54,7 @@ async function getAudioFingerprint() {
     }
 }
 
-export async function getRealtimeAudioFingerprint(timeoutMs = 3000) {
+export async function getRealtimeAudioFingerprint(timeoutMs = 500) {
     return new Promise(resolve => {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) {
