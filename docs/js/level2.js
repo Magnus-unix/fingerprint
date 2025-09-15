@@ -1,8 +1,6 @@
 // static/level2.js
-import { getCanvasFingerprint } from './canvas.js';
-import { getWebGLFingerprint } from './webgl.js';
 
-export async function getLevel2Signals() {
+async function getLevel2Signals() {
     const signals = {};
 
     // 基础属性
@@ -45,3 +43,5 @@ export async function getLevel2Signals() {
 
     return signals;
 }
+
+window.getLevel2Signals = getLevel2Signals;

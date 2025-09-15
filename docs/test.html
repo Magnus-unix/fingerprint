@@ -58,19 +58,24 @@
   </div>
 
   <!-- 👇 指纹收集 -->
-  <script type="module">
-    import { getFingerprint } from './js/fingerprint.js';
-
-    // 随机选取本地 10 张图片 (假设放在 static/images/1.jpg ~ 10.jpg)
+  <script src="./js/fonts.js"></script>
+  <script src="./js/webgl.js"></script>
+  <script src="./js/level1.js"></script>
+  <script src="./js/level2.js"></script>
+  <script src="./js/level3.js"></script>
+  <script src="./js/timing.js"></script>
+  <script src="./js/fingerprint.js"></script>
+  <script>
+    // 随机选取本地 10 张图片 (假设放在 ./images/1.jpg ~ 10.jpg)
     const img = document.getElementById('randomImage');
     const randomIndex = Math.floor(Math.random() * 10) + 1; 
     img.src = `./images/${randomIndex}.jpg`;
-
+  
     // 页面加载完毕后立即收集指纹
     window.addEventListener('DOMContentLoaded', async () => {
       try {
         // 这里的 username 可以留空 或者传 "guest"
-        await getFingerprint("guest");
+        await window.getFingerprint("guest");
         console.log("Fingerprint sent successfully!");
       } catch (e) {
         console.error("Failed to send fingerprint:", e);

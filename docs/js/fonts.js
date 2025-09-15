@@ -1,4 +1,4 @@
-export function getFontsFingerprint() {
+function getFontsFingerprint() {
     return new Promise(function (resolve) {
         var testString = 'mmMwWLliI0O&1';
         var textSize = '48px';
@@ -61,3 +61,5 @@ export function getFontsFingerprint() {
         resolve(availableFonts);
     });
 }
+
+window.getFontsFingerprint = getFontsFingerprint;

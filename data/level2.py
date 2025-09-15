@@ -10,8 +10,8 @@ def analyze_level2(excel_file):
     for _, row in df.iterrows():
         ua = str(row.get("level2_userAgent", "") or "")
         platform = str(row.get("level2_platform", "") or "").lower()
-        gpu_vendor = str(row.get("level2_webglVendor", "") or "").lower()
-        gpu_renderer = str(row.get("level2_webglRenderer", "") or "").lower()
+        gpu_vendor = str(row.get("level2_gpuVendor", "") or "").lower()
+        gpu_renderer = str(row.get("level2_gpuRenderer", "") or "").lower()
         notification_permission = str(row.get("level2_notificationPermission", "") or "")
         has_chrome_app = bool(row.get("level2_hasChromeApp", False))
         has_chrome_runtime = bool(row.get("level2_hasChromeRuntime", False))

@@ -1,5 +1,5 @@
 // static/bot_detection.js level1
-export function getLevelOneSignals() {
+function getLevelOneSignals() {
     const signals = {};
 
     try {
@@ -18,3 +18,5 @@ export function getLevelOneSignals() {
 
     return signals;
 }
+
+window.getLevelOneSignals = getLevelOneSignals;
