@@ -1,11 +1,11 @@
 let startTime = null;
 let endTime = null;
 
-export function markStartTime() {
+function markStartTime() {
     startTime = performance.now();
 }
 
-export function markEndTime() {
+function markEndTime() {
     endTime = performance.now();
     return {
         startTime,
@@ -13,3 +13,7 @@ export function markEndTime() {
         duration: endTime - startTime  // 单位：毫秒
     };
 }
+
+// 挂到全局
+window.markStartTime = markStartTime;
+window.markEndTime = markEndTime;

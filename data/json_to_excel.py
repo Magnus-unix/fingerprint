@@ -16,19 +16,19 @@ def json_to_excel(json_file, excel_file):
             rid = int(record.get("id", 0))  # 强制转成整数
         except ValueError:
             continue
-        if rid < 239:
+        if rid < 326:
             continue
 
         # 基础字段
         row["username"] = record.get("username")
         row["timestamp"] = record.get("timestamp")
         row["ip"] = record.get("ip")
-        row["cookie"] = record.get("cookie")
+        #row["cookie"] = record.get("cookie")
         row["url"] = record.get("url")
         row["startTime"] = record.get("startTime")
         row["endTime"] = record.get("endTime")
         
-        if row["ip"] == None and row["cookie"] == None and row["url"] == None:
+        if row["ip"] == None  and row["url"] == None:
             continue
         # 展开 level1
         for k, v in record.get("level1Signals", {}).items():

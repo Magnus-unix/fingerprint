@@ -16,7 +16,7 @@ function getWebGLContext() {
     );
 }
 
-export async function getWebGLFingerprint() {
+async function getWebGLFingerprint() {
     try {
         const gl = getWebGLContext();
         if (!gl) return { supported: false };
@@ -110,3 +110,5 @@ export async function getWebGLFingerprint() {
         return { supported: false, error: e.message || "webgl_error" };
     }
 }
+
+window.getWebGLFingerprint = getWebGLFingerprint;

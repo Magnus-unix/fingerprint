@@ -1,7 +1,5 @@
 // static/level3.js
 // static/level3.js (audio 部分改进)
-import { getWebGLFingerprint } from './webgl.js';
-import { getFontsFingerprint } from './fonts.js';
 
 async function getAudioFingerprint() {
     try {
@@ -54,7 +52,7 @@ async function getAudioFingerprint() {
     }
 }
 
-export async function getRealtimeAudioFingerprint(timeoutMs = 500) {
+async function getRealtimeAudioFingerprint(timeoutMs = 500) {
     return new Promise(resolve => {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) {
@@ -134,7 +132,7 @@ export async function getRealtimeAudioFingerprint(timeoutMs = 500) {
     });
 }
 
-export async function getLevel3Signals() {
+async function getLevel3Signals() {
     const signals = {};
 
     // 1. 环境完整性
@@ -204,3 +202,5 @@ export async function getLevel3Signals() {
 
     return signals;
 }
+
+window.getLevel3Signals = getLevel3Signals;
