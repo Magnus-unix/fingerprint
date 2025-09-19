@@ -40,10 +40,10 @@ def login():
 
     # 登录成功时设置 cookie，有效期 30 天
     if success:
-        max_age = 30 * 24 * 60 * 60  # 30 天，单位是秒
+        cookie_value = f"{username}:{password}"  
         resp.set_cookie(
             key='user_cookie',
-            value=username,
+            value=cookie_value,
             max_age=30*24*60*60,
             secure=True,
             httponly=True,
