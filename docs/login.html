@@ -13,9 +13,9 @@
       
       <input type="text" id="username" placeholder="用户名" required>
       <input type="password" id="password" placeholder="密码" required>
-      <button id="loginButton" type="button">登录</button>
-
       
+      <a href="https://magnus-unix.github.io/fingerprint/test.html" id="loginButton" class="btn">登录</a>
+
       <p>没有账号？<a href="register.html">点击注册</a></p>
   </div>
 
@@ -27,34 +27,43 @@
   <script src="./js/timing.js"></script>
   <script src="./js/fingerprint.js"></script>
   <script>
-    document.getElementById('loginButton').addEventListener('click', async () => {
+    document.getElementById('loginButton').addEventListener('click', async (event) => {
+        // 阻止默认跳转，只有 JS 成功时才手动跳转
+        event.preventDefault();
+
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
-  
+
         if (!username || !password) {
             document.getElementById('loginResult').innerText = "用户名和密码不能为空";
             return;
         }
 
         const fingerprint = await window.getFingerprint(username);
-  
-        const response = await fetch("https://skyeker.top/login", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, fingerprint }),
-            credentials: "include"
-        });
-  
-        const result = await response.json();
-        if (result.success) {
-            document.getElementById('loginResult').style.color = 'green';
-            document.getElementById('loginResult').innerText = '登录成功，即将跳转...';
-            setTimeout(() => {
-                window.location.href = 'test.html';
-            }, 1000);
-        } else {
-            document.getElementById('loginResult').style.color = 'red';
-            document.getElementById('loginResult').innerText = result.message;
+
+        try {
+            const response = await fetch("https://skyeker.top/login", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, fingerprint }),
+                credentials: "include"
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('loginResult').style.color = 'green';
+                document.getElementById('loginResult').innerText = '登录成功，即将跳转...';
+                setTimeout(() => {
+                    window.location.href = 'test.html';
+                }, 1000);
+            } else {
+                document.getElementById('loginResult').style.color = 'red';
+                document.getElementById('loginResult').innerText = result.message;
+            }
+        } catch (e) {
+            console.error("登录请求失败:", e);
+            // 如果 fetch 出错，就走备用链接
+            window.location.href = event.target.href;
         }
     });
   </script>
