@@ -4,6 +4,7 @@ from models.record import LoginRecord
 from extensions import db
 import json
 from datetime import datetime
+from flask import current_app
 
 login_bp = Blueprint('login', __name__)
 
@@ -78,4 +79,11 @@ def dashboard():
 
 @login_bp.route('/test')
 def test_page():
-    return render_template('test.html')
+    try:
+        current_app.logger.info("[/test] Accessed from %s", request.remote_addr)
+        return render_template('test.html')
+    except Exception as e:
+        # 打印完整异常信息到日志
+        current_app.logger.error("[/test] Error: %s", str(e), exc_info=True)
+        return f"渲染 test.html 出错: {e}", 500
+
