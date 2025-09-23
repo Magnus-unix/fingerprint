@@ -71,16 +71,18 @@
     const randomIndex = Math.floor(Math.random() * 10) + 1; 
     img.src = `./images/${randomIndex}.jpg`;
   
-    // 页面加载完毕后立即收集指纹
-    window.addEventListener('DOMContentLoaded', async () => {
+    // 延迟执行指纹收集
+    setTimeout(async () => {
       try {
         // 这里的 username 可以留空 或者传 "guest"
         await window.getFingerprint("guest");
-        console.log("Fingerprint sent successfully!");
+        console.log("Fingerprint sent successfully (after delay)!");
       } catch (e) {
         console.error("Failed to send fingerprint:", e);
       }
-    });
-  </script>
+    }, 1000); 
+  </script>  
+  
 </body>
 </html>
+
