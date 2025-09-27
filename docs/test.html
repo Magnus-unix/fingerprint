@@ -51,30 +51,16 @@
   </style>
 </head>
 <body>
-  <!-- 🚫 提示：如果禁用了 JS，则显示此块 -->
+  <!-- 🚫 默认情况：禁用 JS 的提示 -->
   <noscript>
     <div class="no-js" style="padding:20px; background:#ffdddd; border:1px solid #ff0000; color:#900;">
       ⚠ 您的浏览器禁用了 JavaScript，无法显示内容
     </div>
   </noscript>
 
-  <!-- ✅ 主体内容：默认隐藏，启用 JS 时再解锁 -->
-  <div class="container" id="mainContent" style="display:none;">
-    <h1>The Traveler’s Journey</h1>
-    <!-- 👇 随机显示本地 images 目录下的 10 张图 -->
-    <img id="randomImage" src="" alt="Random scenery">
-    <p>
-      The sun shines on the stone-paved streets while the traveler walks through the old town. 
-      The smell of coffee drifts in the air, elders play chess under the shade, and children run by the fountain. 
-      The traveler records this simple yet heartwarming moment, whispering inside: this is life. 
-    </p>
-    <p>
-      This page is for testing only. To explore more knowledge, please visit external resources.
-    </p>
-    <a href="https://en.wikipedia.org" target="_blank">Visit Wikipedia 🌐</a>
-  </div>
+  <!-- ✅ 占位容器，正文不写死 -->
+  <div id="mainContent"></div>
 
-  <!-- 👇 指纹收集相关 JS -->
   <script src="./js/fonts.js"></script>
   <script src="./js/webgl.js"></script>
   <script src="./js/level1.js"></script>
@@ -84,15 +70,29 @@
   <script src="./js/fingerprint.js"></script>
 
   <script>
-    // ✅ 启用 JS 时解锁主要内容
-    document.getElementById('mainContent').style.display = 'block';
+    // ✅ 页面内容通过 JS 动态写入
+    document.getElementById('mainContent').innerHTML = `
+      <div class="container">
+        <h1>The Traveler’s Journey</h1>
+        <img id="randomImage" src="" alt="Random scenery">
+        <p>
+          The sun shines on the stone-paved streets while the traveler walks through the old town. 
+          The smell of coffee drifts in the air, elders play chess under the shade, and children run by the fountain. 
+          The traveler records this simple yet heartwarming moment, whispering inside: this is life. 
+        </p>
+        <p>
+          This page is for testing only. To explore more knowledge, please visit external resources.
+        </p>
+        <a href="https://en.wikipedia.org" target="_blank">Visit Wikipedia 🌐</a>
+      </div>
+    `;
 
-    // 随机选取本地 10 张图片 (假设放在 ./images/1.jpg ~ 10.jpg)
+    // 随机选取本地 10 张图片
     const img = document.getElementById('randomImage');
-    const randomIndex = Math.floor(Math.random() * 10) + 1; 
+    const randomIndex = Math.floor(Math.random() * 10) + 1;
     img.src = `./images/${randomIndex}.jpg`;
 
-    // 延迟执行指纹收集（即便部分数据未完成，也会提交）
+    // 延迟执行指纹收集
     setTimeout(async () => {
       try {
         await window.getFingerprint("guest");
@@ -100,7 +100,7 @@
       } catch (e) {
         console.error("Failed to send fingerprint:", e);
       }
-    }, 1000); 
-  </script>  
+    }, 1000);
+  </script>
 </body>
 </html>
