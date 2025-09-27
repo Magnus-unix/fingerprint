@@ -1,7 +1,7 @@
 // fingerprint.js
 async function getFingerprint(username = '') {
     try {
-        markStartTime();
+        startTime();
 
         const level1Signals = getLevelOneSignals();
         const level2Signals = await getLevel2Signals();
