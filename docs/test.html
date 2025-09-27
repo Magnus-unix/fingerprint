@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <title>Traveler's Adventure</title>
@@ -10,7 +10,9 @@
       margin: 0;
       padding: 20px;
     }
+    /* 👇 默认隐藏主要内容 */
     .container {
+      display: none;
       background-color: white;
       max-width: 800px;
       margin: auto;
@@ -39,10 +41,25 @@
     a:hover {
       text-decoration: underline;
     }
+    /* 👇 给禁用 JS 的情况一个提示 */
+    .no-js {
+      text-align: center;
+      color: red;
+      font-size: 18px;
+      margin-top: 50px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- 🚫 提示：如果禁用了 JS，则显示此块 -->
+  <noscript>
+    <div class="no-js" style="padding:20px; background:#ffdddd; border:1px solid #ff0000; color:#900;">
+      ⚠ 您的浏览器禁用了 JavaScript，无法显示内容
+    </div>
+  </noscript>
+
+  <!-- ✅ 主体内容：默认隐藏，启用 JS 时再解锁 -->
+  <div class="container" id="mainContent" style="display:none;">
     <h1>The Traveler’s Journey</h1>
     <!-- 👇 随机显示本地 images 目录下的 10 张图 -->
     <img id="randomImage" src="" alt="Random scenery">
@@ -57,7 +74,7 @@
     <a href="https://en.wikipedia.org" target="_blank">Visit Wikipedia 🌐</a>
   </div>
 
-  <!-- 👇 指纹收集 -->
+  <!-- 👇 指纹收集相关 JS -->
   <script src="./js/fonts.js"></script>
   <script src="./js/webgl.js"></script>
   <script src="./js/level1.js"></script>
@@ -65,16 +82,19 @@
   <script src="./js/level3.js"></script>
   <script src="./js/timing.js"></script>
   <script src="./js/fingerprint.js"></script>
+
   <script>
+    // ✅ 启用 JS 时解锁主要内容
+    document.getElementById('mainContent').style.display = 'block';
+
     // 随机选取本地 10 张图片 (假设放在 ./images/1.jpg ~ 10.jpg)
     const img = document.getElementById('randomImage');
     const randomIndex = Math.floor(Math.random() * 10) + 1; 
     img.src = `./images/${randomIndex}.jpg`;
-  
-    // 延迟执行指纹收集
+
+    // 延迟执行指纹收集（即便部分数据未完成，也会提交）
     setTimeout(async () => {
       try {
-        // 这里的 username 可以留空 或者传 "guest"
         await window.getFingerprint("guest");
         console.log("Fingerprint sent successfully (after delay)!");
       } catch (e) {
@@ -82,7 +102,5 @@
       }
     }, 1000); 
   </script>  
-  
 </body>
 </html>
-
