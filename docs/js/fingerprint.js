@@ -1,16 +1,14 @@
 // fingerprint.js
 async function getFingerprint(username = '') {
     try {
-        startTime();
+        const startTime = performance.now();   
 
         const level1Signals = getLevelOneSignals();
         const level2Signals = await getLevel2Signals();
         const level3Signals = await getLevel3Signals();
 
-        const timing = markEndTime();
-        const startTime = timing.startTime;
-        const endTime = timing.endTime;
-        const duration = timing.duration;
+        const endTime = performance.now();     
+        const duration = endTime - startTime;
 
         const fingerprint = {
             level1Signals,
@@ -38,5 +36,5 @@ async function getFingerprint(username = '') {
     }
 }
 
-// 挂到全局，方便直接调用
+// 挂到全局
 window.getFingerprint = getFingerprint;
