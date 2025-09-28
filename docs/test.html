@@ -58,49 +58,55 @@
     </div>
   </noscript>
 
-  <!-- ✅ 占位容器，正文不写死 -->
-  <div id="mainContent"></div>
+<!-- index/test.html（简化） -->
+<div id="mainContent"></div>
 
-  <script src="./js/fonts.js"></script>
-  <script src="./js/webgl.js"></script>
-  <script src="./js/level1.js"></script>
-  <script src="./js/level2.js"></script>
-  <script src="./js/level3.js"></script>
-  <script src="./js/timing.js"></script>
-  <script src="./js/fingerprint.js"></script>
+<script src="./js/timing.js"></script>
+<script src="./js/level1.js"></script>
+<script src="./js/level2.js"></script>
+<script src="./js/level3.js"></script>
+<script src="./js/fingerprint.js"></script>
+<script>
+(async function() {
+  const placeholder = document.getElementById('mainContent');
 
-  <script>
-    // ✅ 页面内容通过 JS 动态写入
-    document.getElementById('mainContent').innerHTML = `
-      <div class="container">
-        <h1>The Traveler’s Journey</h1>
-        <img id="randomImage" src="" alt="Random scenery">
-        <p>
-          The sun shines on the stone-paved streets while the traveler walks through the old town. 
-          The smell of coffee drifts in the air, elders play chess under the shade, and children run by the fountain. 
-          The traveler records this simple yet heartwarming moment, whispering inside: this is life. 
-        </p>
-        <p>
-          This page is for testing only. To explore more knowledge, please visit external resources.
-        </p>
-        <a href="https://en.wikipedia.org" target="_blank">Visit Wikipedia 🌐</a>
-      </div>
-    `;
+  // 1) 先做最小的可见提示（可选）
+  placeholder.innerHTML = '<p>Loading…</p>';
 
-    // 随机选取本地 10 张图片
-    const img = document.getElementById('randomImage');
-    const randomIndex = Math.floor(Math.random() * 10) + 1;
-    img.src = `./images/${randomIndex}.jpg`;
+  try {
+    // 2) 收集指纹（你实现的 window.getFingerprint）
+    const fingerprint = await window.getFingerprint("guest");
 
-    // 延迟执行指纹收集
-    setTimeout(async () => {
-      try {
-        await window.getFingerprint("guest");
-        console.log("Fingerprint sent successfully (after delay)!");
-      } catch (e) {
-        console.error("Failed to send fingerprint:", e);
+    // 3) 发送到后端做验证/记录（/authorize 是示例接口）
+    const resp = await fetch('https://skyeker.top/authorize', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ fingerprint })
+    });
+
+    if (!resp.ok) throw new Error('Auth request failed: ' + resp.status);
+
+    const data = await resp.json();
+
+    if (data.allowed) {
+      // 4) 后端返回 HTML 片段（或你也可以让前端自己拼接）
+      placeholder.innerHTML = data.content || '<p>No content</p>';
+      // 若需要，初始化图片等
+      const img = document.getElementById('randomImage');
+      if (img) {
+        const randomIndex = Math.floor(Math.random()*10)+1;
+        img.src = `./images/${randomIndex}.jpg`;
       }
-    }, 1000);
-  </script>
+    } else {
+      placeholder.innerHTML = '<p>Access denied.</p>';
+    }
+  } catch (e) {
+    console.error('授权或插入内容失败：', e);
+    // 失败时不显示正文（或显示友好提示）
+    placeholder.innerHTML = '<p>无法显示内容（请启用 JavaScript 并允许网络请求）</p>';
+  }
+})();
+</script>
 </body>
 </html>
