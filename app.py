@@ -13,9 +13,9 @@ def create_app():
 
     # 注册蓝图
     from routes.login import login_bp
-    from routes.authorize import auth_bp   # ✅ 新增的蓝图
+    from routes.authorize import authorize_bp
     app.register_blueprint(login_bp)
-    app.register_blueprint(auth_bp)        # ✅ 注册 authorize
+    app.register_blueprint(authorize_bp)
 
     # ✅ 只在数据库为空时初始化，而不是每次都 drop_all
     with app.app_context():

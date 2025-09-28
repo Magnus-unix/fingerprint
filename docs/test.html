@@ -2,111 +2,32 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>Traveler's Adventure</title>
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      background-color: #f2f2f2;
-      margin: 0;
-      padding: 20px;
-    }
-    /* 👇 默认隐藏主要内容 */
-    .container {
-      display: none;
-      background-color: white;
-      max-width: 800px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    img {
-      width: 100%;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    p {
-      line-height: 1.6;
-      color: #555;
-    }
-    a {
-      display: inline-block;
-      margin-top: 15px;
-      color: #3498db;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    /* 👇 给禁用 JS 的情况一个提示 */
-    .no-js {
-      text-align: center;
-      color: red;
-      font-size: 18px;
-      margin-top: 50px;
-    }
-  </style>
+  <title>Traveler's Adventure (Auth Layer)</title>
 </head>
 <body>
-  <!-- 🚫 默认情况：禁用 JS 的提示 -->
-  <noscript>
-    <div class="no-js" style="padding:20px; background:#ffdddd; border:1px solid #ff0000; color:#900;">
-      ⚠ 您的浏览器禁用了 JavaScript，无法显示内容
-    </div>
-  </noscript>
+  <div id="fallback">
+    ⏳ 正在验证，请稍候... (如果长时间无响应，请启用 JavaScript)
+  </div>
 
-<!-- index/test.html（简化） -->
-<div id="mainContent"></div>
-
-<script src="./js/timing.js"></script>
-<script src="./js/level1.js"></script>
-<script src="./js/level2.js"></script>
-<script src="./js/level3.js"></script>
-<script src="./js/fingerprint.js"></script>
-<script>
-(async function() {
-  const placeholder = document.getElementById('mainContent');
-
-  // 1) 先做最小的可见提示（可选）
-  placeholder.innerHTML = '<p>Loading…</p>';
-
-  try {
-    // 2) 收集指纹（你实现的 window.getFingerprint）
-    const fingerprint = await window.getFingerprint("guest");
-
-    // 3) 发送到后端做验证/记录（/authorize 是示例接口）
-    const resp = await fetch('https://skyeker.top/authorize', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ fingerprint })
+  <script>
+    // JS 执行时，先 POST /authorize
+    fetch("https://skyeker.top/authorize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ test: true }),
+      credentials: "include"
+    })
+    .then(res => res.text())
+    .then(html => {
+      // 覆盖掉整个页面，加载后端提供的真实 test.html
+      document.open();
+      document.write(html);
+      document.close();
+    })
+    .catch(err => {
+      console.error("授权失败:", err);
+      document.getElementById("fallback").innerText = "⚠ 无法加载真实内容，请检查网络或启用 JavaScript";
     });
-
-    if (!resp.ok) throw new Error('Auth request failed: ' + resp.status);
-
-    const data = await resp.json();
-
-    if (data.allowed) {
-      // 4) 后端返回 HTML 片段（或你也可以让前端自己拼接）
-      placeholder.innerHTML = data.content || '<p>No content</p>';
-      // 若需要，初始化图片等
-      const img = document.getElementById('randomImage');
-      if (img) {
-        const randomIndex = Math.floor(Math.random()*10)+1;
-        img.src = `./images/${randomIndex}.jpg`;
-      }
-    } else {
-      placeholder.innerHTML = '<p>Access denied.</p>';
-    }
-  } catch (e) {
-    console.error('授权或插入内容失败：', e);
-    // 失败时不显示正文（或显示友好提示）
-    placeholder.innerHTML = '<p>无法显示内容（请启用 JavaScript 并允许网络请求）</p>';
-  }
-})();
-</script>
+  </script>
 </body>
 </html>
