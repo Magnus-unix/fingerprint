@@ -9,17 +9,23 @@
     ⏳ 正在验证，请稍候... (如果长时间无响应，请启用 JavaScript)
   </div>
 
+  <noscript>
+    <div style="color:red; padding:20px;">
+      ⚠ 您的浏览器未启用 JavaScript，无法查看此页面内容
+    </div>
+  </noscript>
+
   <script>
-    // JS 执行时，先 POST /authorize
+    // ✅ 向后端确认 JS 可执行，并带上时间戳
     fetch("https://skyeker.top/authorize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ test: true }),
+      body: JSON.stringify({ js_executed: true, timestamp: Date.now() }),
       credentials: "include"
     })
     .then(res => res.text())
     .then(html => {
-      // 覆盖掉整个页面，加载后端提供的真实 test.html
+      // 覆盖掉空壳内容，显示后端返回的真实 test.html
       document.open();
       document.write(html);
       document.close();
