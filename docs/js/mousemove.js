@@ -35,7 +35,7 @@ function cleanup(now = Date.now()) {
 }
 
 // 导出接口：返回当前窗口内的原始点（返回副本，避免外部修改内部队列）
-export function getMouseMovementData() {
+function getMouseMovementData() {
   const now = Date.now();
   cleanup(now);
   return {
@@ -47,7 +47,7 @@ export function getMouseMovementData() {
 }
 
 // 分析函数
-export function analyzeMouseData(rawArray) {
+function analyzeMouseData(rawArray) {
   const features = [];
   if (!Array.isArray(rawArray) || rawArray.length < 2) return features;
   for (let i = 1; i < rawArray.length; i++) {

@@ -25,7 +25,7 @@ document.addEventListener('keydown', (e) => {
 }, { passive: true }); // 不阻止默认事件
 
 
-export function getKeyboardData() {
+function getKeyboardData() {
     return {
         strokes: keystrokes.slice(),  
         total: keystrokes.length,
