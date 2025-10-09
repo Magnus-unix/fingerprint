@@ -3,10 +3,10 @@ async function getFingerprint(username = '') {
     try {
         const startTime = performance.now();   
 
-        const audioData = getAudioFingerprint();
+        const audioData = await getAudioFingerprint();
         const canvasData = getCanvasFingerprint();
-        const webglData = getWebGLFingerprint();
-        const fontsData = getFontsFingerprint();
+        const webglData = await getWebGLFingerprint();
+        const fontsData = await getFontsFingerprint();
         const level1Signals = getLevelOneSignals();
         const level2Signals = await getLevel2Signals();
         const level3Signals = await getLevel3Signals();
