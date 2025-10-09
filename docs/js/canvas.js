@@ -1,4 +1,4 @@
-export function getCanvasFingerprint() {
+function getCanvasFingerprint() {
     var winding = false;
     var geometry;
     var text;
@@ -69,3 +69,5 @@ function renderGeometryImage(canvas, context) {
     context.arc(60, 60, 20, 0, Math.PI * 2, true);
     context.fill('evenodd');
 }
+
+window.getCanvasFingerprint = getCanvasFingerprint;

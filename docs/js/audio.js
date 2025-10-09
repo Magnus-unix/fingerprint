@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-export function getAudioFingerprint() {
+function getAudioFingerprint() {
     return __awaiter(this, void 0, void 0, function () {
         var AudioContext, context, oscillator, compressor, buffer, signal, hash, i, e_1;
         return __generator(this, function (_a) {
@@ -77,3 +77,5 @@ export function getAudioFingerprint() {
         });
     });
 }
+
+window.getAudioFingerprint = getAudioFingerprint;
