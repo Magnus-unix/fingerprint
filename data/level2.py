@@ -32,33 +32,50 @@ def analyze_level2(excel_file):
         reasons = []
 
         # 1. UA 和 platform 不一致
-        if ("windows" in ua.lower() and "linux" in platform) or \
-           ("mac" in ua.lower() and "win" in platform):
+        if ("win" in ua.lower() and "linux" in platform.lower()) or \
+           ("mac" in ua.lower() and "win" in platform.lower()) or \
+           ("mac" in ua.lower() and "linux" in platform.lower()) :
             is_bot = True
             reasons.append("UA-platform mismatch")
 
-        # 2. GPU 信息缺失/异常
+        # 2. GPU 信息缺失/平台异常
+        gpu_anomaly = False
         if gpu_vendor in ["", "unknown", "error", "null"]:
-            is_bot = True
+            gpu_anomaly = True
             reasons.append("suspicious GPU vendor")
         if gpu_renderer in ["", "unknown", "error", "null"]:
-            is_bot = True
+            gpu_anomaly = True
             reasons.append("suspicious GPU renderer")
+        if "windows" in ua.lower() and any(k in gpu_renderer.lower() for k in ["apple", "mali", "adreno"]):
+            gpu_anomaly = True
+            reasons.append("GPU inconsistent with Windows UA")
+        elif "mac" in ua.lower() and not any(k in gpu_renderer.lower() for k in ["apple", "intel", "amd", "radeon"]):
+            gpu_anomaly = True
+            reasons.append("GPU inconsistent with macOS UA")
+        elif "android" in ua.lower() and not any(k in gpu_renderer.lower() for k in ["mali", "adreno", "powervr", "qualcomm"]):
+            gpu_anomaly = True
+            reasons.append("GPU inconsistent with Android UA")
+
+        if gpu_anomaly == True:
+            is_bot = True
 
         # 3. 权限 API
-        if notification_permission == "error":
+        if notification_permission not in ["prompt", "granted"]:
+            reasons.append(f"unexpected permission state: {notification_permission}")
             is_bot = True
-            reasons.append("notification permission error")
-
+        
         # 4. Chrome 内部属性异常
-        if not has_chrome_runtime and "chrome" in ua.lower() :
+        if has_chrome_runtime and "chrome" in ua.lower() :
             is_bot = True
-            reasons.append("Chrome runtime inconsistency")
+            reasons.append("chrome.runtime unexpectedly present")
+        if not has_chrome_app and "chrome" in ua.lower() :
+            is_bot = True
+            reasons.append("chrome.app structure invalid (likely bot)")
 
-        # 5. 屏幕与窗口大小不符
-        if screen_mismatch:
+        # 5. 屏幕与窗口大小
+        if not screen_mismatch:
             is_bot = True
-            reasons.append("screen vs window mismatch")
+            reasons.append("screen-window identical")
 
         # 6. deviceMemory / hardwareConcurrency 检查
         if device_memory == 0 or device_memory > 128:  # 太小或太大
@@ -72,6 +89,7 @@ def analyze_level2(excel_file):
         results.append({
             "username": row.get("username", ""),
             "cookie": row.get("cookie", ""),
+            "timestamp": row.get("timestamp"),
             "is_bot": is_bot,
             "reasons": "; ".join(reasons) if reasons else "looks normal"
         })

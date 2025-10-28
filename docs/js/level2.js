@@ -10,7 +10,8 @@ async function getLevel2Signals() {
 
     // UA 和 platform 一致性
     signals.uaPlatformMismatch = (signals.userAgent.includes("Windows") && signals.platform.toLowerCase().includes("linux")) ||
-                                 (signals.userAgent.includes("Mac") && signals.platform.toLowerCase().includes("win"));
+                                 (signals.userAgent.includes("Mac") && signals.platform.toLowerCase().includes("win")) ||
+                                 (signals.userAgent.includes("linux") && signals.platform.toLocaleLowerCase().includes("mac"));
 
     // ✅ WebGL
     try {

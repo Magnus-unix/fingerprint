@@ -1,5 +1,4 @@
 // static/level3.js
-// static/level3.js (audio 部分改进)
 
 async function getAudioFingerprint() {
     try {
