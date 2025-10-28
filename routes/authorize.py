@@ -30,3 +30,4 @@ def authorize():
     except Exception as e:
         current_app.logger.error(f"[/authorize] 处理出错: {e}", exc_info=True)
         return jsonify({"success": False, "message": "服务器内部错误"}), 500
+    

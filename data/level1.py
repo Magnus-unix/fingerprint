@@ -32,11 +32,10 @@ def analyze_level1(excel_file):
 
         # Chrome 检查
         ua = str(row.get("level1_userAgent", "") or "")
-        #has_chrome = row.get("level1_hasChrome", False)
         has_runtime = row.get("level1_hasChromeRuntime", False)
-        if not has_runtime and "chrome" in ua.lower():
+        if has_runtime and "chrome" in ua.lower():
             is_bot = True
-            reasons.append("UA contains Chrome but chrome flags missing")
+            reasons.append("chrome.runtime unexpectedly present")
 
         # mimeTypes
         if row.get("level1_mimeTypesLength", 0) == 0:
@@ -73,6 +72,7 @@ def analyze_level1(excel_file):
         results.append({
             "username": row.get("username"),
             "cookie": row.get("cookie"),
+            "timestamp": row.get("timestamp"),
             "is_bot": is_bot,
             "reasons": "; ".join(reasons) if reasons else "looks normal"
         })
