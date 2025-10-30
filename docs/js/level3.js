@@ -169,7 +169,7 @@ async function getLevel3Signals() {
     } catch (e) {
         signals.audioError = e.toString();
     }
-
+/*
     try{
         const audioResult = await getRealtimeAudioFingerprint();
         signals.realtimeAudioSample = audioResult.sample;
@@ -177,7 +177,7 @@ async function getLevel3Signals() {
     } catch (e) {
         signals.audioError = e.toString();
     }
-    
+*/
     // 3. 执行上下文
     signals.requestIdleCallbackSupported = typeof requestIdleCallback === 'function';
     signals.queueMicrotaskSupported = typeof queueMicrotask === 'function';
