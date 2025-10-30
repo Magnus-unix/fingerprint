@@ -1,0 +1,18 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE folders
+.vscode/
+.idea/
+
+# Python example
+__pycache__/
+*.pyc
+
