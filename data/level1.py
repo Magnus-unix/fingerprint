@@ -59,6 +59,9 @@ def analyze_level1(excel_file):
             if abs(diff) > 200:
                 is_bot = True
                 reasons.append(f"outerVsScreenWidth suspicious={diff}")
+            elif diff < 0:  # 如果差异为负，也可以视为可疑
+                is_bot = True
+                reasons.append(f"outerVsScreenWidth suspicious (negative diff)={diff}")
         except (ValueError,TypeError):
             is_bot = True
             reasons.append(f"outerVsScreenWidth suspicious={diff}")
