@@ -50,7 +50,7 @@ async function getAudioFingerprint() {
         return { error: e.toString() };
     }
 }
-
+/*
 async function getRealtimeAudioFingerprint(timeoutMs = 500) {
     return new Promise(resolve => {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -130,7 +130,7 @@ async function getRealtimeAudioFingerprint(timeoutMs = 500) {
         }, timeoutMs);
     });
 }
-
+*/
 async function getLevel3Signals() {
     const signals = {};
 
