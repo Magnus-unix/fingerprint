@@ -58,7 +58,7 @@ async function getRealtimeAudioFingerprint() {
 
     // 定义一个 300ms 的硬超时，保证函数必返回
     const timeout = new Promise(resolve => {
-        setTimeout(() => resolve({ sample: null, jitterVar: null, error: "timeout" }), 500);
+        setTimeout(() => resolve({ sample: null, jitterVar: null, error: "timeout" }), 300);
     });
 
     const attempt = (async () => {
