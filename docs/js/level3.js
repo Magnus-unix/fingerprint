@@ -50,7 +50,8 @@ async function getAudioFingerprint() {
         return { error: e.toString() };
     }
 }
-async function getRealtimeAudioFingerprint(timeoutMs = 5000) {
+
+async function getRealtimeAudioFingerprint() {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) {
         return { sample: null, jitterVar: null, error: "unsupported" };
@@ -59,62 +60,19 @@ async function getRealtimeAudioFingerprint(timeoutMs = 5000) {
     try {
         const ctx = new AudioCtx();
 
-        // 若被挂起，则等待用户交互
+        // 如果自动播放策略阻止，不等待用户交互，直接跳过
         if (ctx.state === "suspended") {
-            let resolved = false;
-
-            // 监听一次用户交互
-            const resumeOnGesture = () => {
-                if (!resolved) {
-                    resolved = true;
-                    document.removeEventListener("click", resumeOnGesture);
-                    document.removeEventListener("keydown", resumeOnGesture);
-                    document.removeEventListener("touchstart", resumeOnGesture);
-                    ctx.resume().then(runAnalysis).catch(() => {
-                        resolveResult("blocked_by_autoplay_policy");
-                    });
-                }
-            };
-
-            const resolveResult = (errorType) => {
-                resolved = true;
-                document.removeEventListener("click", resumeOnGesture);
-                document.removeEventListener("keydown", resumeOnGesture);
-                document.removeEventListener("touchstart", resumeOnGesture);
-                resolve({
-                    sample: null,
-                    jitterVar: null,
-                    error: errorType,
-                });
-            };
-
-            return await new Promise((resolve) => {
-                const timer = setTimeout(() => {
-                    if (!resolved) resolveResult("blocked_by_autoplay_policy");
-                }, timeoutMs);
-
-                document.addEventListener("click", resumeOnGesture);
-                document.addEventListener("keydown", resumeOnGesture);
-                document.addEventListener("touchstart", resumeOnGesture);
-
-                async function runAnalysis() {
-                    clearTimeout(timer);
-                    const result = await analyzeAudio(ctx);
-                    resolve(result);
-                }
-            });
+            try {
+                await ctx.resume();
+            } catch {
+                ctx.close();
+                return { sample: null, jitterVar: null, error: "blocked_by_autoplay_policy" };
+            }
         }
 
-        // 若没被挂起，直接采集
-        return await analyzeAudio(ctx);
-    } catch (e) {
-        return { sample: null, jitterVar: null, error: e.toString() };
-    }
-
-    // 实际音频采集逻辑
-    async function analyzeAudio(ctx) {
         const oscillator = ctx.createOscillator();
         const analyser = ctx.createAnalyser();
+
         analyser.fftSize = 2048;
         oscillator.type = "sine";
         oscillator.frequency.value = 440;
@@ -123,7 +81,8 @@ async function getRealtimeAudioFingerprint(timeoutMs = 5000) {
         analyser.connect(ctx.destination);
         oscillator.start();
 
-        await new Promise((r) => setTimeout(r, 200));
+        // 等待一点采样时间（100~200ms）
+        await new Promise(resolve => setTimeout(resolve, 150));
 
         const array = new Float32Array(analyser.frequencyBinCount);
         analyser.getFloatFrequencyData(array);
@@ -138,6 +97,8 @@ async function getRealtimeAudioFingerprint(timeoutMs = 5000) {
         ctx.close();
 
         return { sample, jitterVar: variance };
+    } catch (e) {
+        return { sample: null, jitterVar: null, error: e.toString() };
     }
 }
 
