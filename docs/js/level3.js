@@ -50,7 +50,7 @@ async function getAudioFingerprint() {
         return { error: e.toString() };
     }
 }
-/*
+
 async function getRealtimeAudioFingerprint() {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) {
@@ -113,7 +113,7 @@ async function getRealtimeAudioFingerprint() {
 
     return Promise.race([attempt, timeout]);
 }
-*/
+
 async function getLevel3Signals() {
     const signals = {};
 
@@ -152,7 +152,7 @@ async function getLevel3Signals() {
     } catch (e) {
         signals.audioError = e.toString();
     }
-/*
+
     try{
         const audioResult = await getRealtimeAudioFingerprint();
         signals.realtimeAudioSample = audioResult.sample;
@@ -160,7 +160,7 @@ async function getLevel3Signals() {
     } catch (e) {
         signals.audioError = e.toString();
     }
-*/
+
     // 3. 执行上下文
     signals.requestIdleCallbackSupported = typeof requestIdleCallback === 'function';
     signals.queueMicrotaskSupported = typeof queueMicrotask === 'function';
