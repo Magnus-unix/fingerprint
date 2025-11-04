@@ -17,7 +17,6 @@ def create_app():
     from routes.authorize import authorize_bp
     app.register_blueprint(login_bp)
     app.register_blueprint(authorize_bp)
-
     # ✅ 初始化数据库（仅当不存在）
     with app.app_context():
         db.create_all()
