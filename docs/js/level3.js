@@ -71,14 +71,7 @@ async function getRealtimeAudioFingerprint() {
                 return { sample: null, jitterVar: null, error: "creation_failed" };
             }
 
-            if (ctx.state === "suspended") {
-                try {
-                    await ctx.resume();
-                } catch {
-                    ctx.close();
-                    return { sample: null, jitterVar: null, error: "blocked_by_autoplay_policy" };
-                }
-            }
+            if (ctx.state === "suspended") return { error: "blocked_by_autoplay_policy" }
 
             const oscillator = ctx.createOscillator();
             const analyser = ctx.createAnalyser();
