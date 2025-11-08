@@ -71,7 +71,7 @@ async function getRealtimeAudioFingerprint() {
                 return { sample: null, jitterVar: null, error: "creation_failed" };
             }
 
-            if (ctx.state === "suspended") return { error: "blocked_by_autoplay_policy" }
+            if (ctx.state === "suspended") return { sample: null, jitterVar: null, error: "blocked_by_autoplay_policy" }
 
             const oscillator = ctx.createOscillator();
             const analyser = ctx.createAnalyser();
@@ -146,13 +146,17 @@ async function getLevel3Signals() {
         signals.audioError = e.toString();
     }
 
-    try{
+    try {
         const audioResult = await getRealtimeAudioFingerprint();
         signals.realtimeAudioSample = audioResult.sample;
         signals.realtimeAudioJitterVar = audioResult.jitterVar;
+        signals.realtimeAudioError = audioResult.error; 
     } catch (e) {
-        signals.audioError = e.toString();
+        signals.realtimeAudioSample = null;
+        signals.realtimeAudioJitterVar = null;
+        signals.realtimeAudioError = e.toString();
     }
+
 
     // 3. 执行上下文
     signals.requestIdleCallbackSupported = typeof requestIdleCallback === 'function';
