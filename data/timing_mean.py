@@ -3,7 +3,7 @@ import numpy as np
 import os, sys
 os.chdir(sys.path[0])
 
-def analyze_timing(json_file, start_id=646, end_id=665):
+def analyze_timing(json_file, start_id=766, end_id=785):
     with open(json_file, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -15,7 +15,7 @@ def analyze_timing(json_file, start_id=646, end_id=665):
         return
 
     # 统计字段
-    fields = ["audio", "canvas", "webgl", "fonts", "level1", "level2", "level3"]
+    fields = ["level1", "level2", "level3"]
     stats = {field: [] for field in fields}
 
     for record in selected:
