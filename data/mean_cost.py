@@ -2,7 +2,7 @@ import json
 import os, sys
 os.chdir(sys.path[0])
 
-def analyze_signal_size_kb(json_file, start_id=594, end_id=665):
+def analyze_signal_size_kb(json_file, start_id=666, end_id=785):
     with open(json_file, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -12,11 +12,7 @@ def analyze_signal_size_kb(json_file, start_id=594, end_id=665):
         print(f"❌ 没有找到 id 在 {start_id}~{end_id} 的数据")
         return
 
-    fields = [
-        "audioData", "canvasData", "webglData", "fontsData",
-        "level1Signals", "level2Signals", "level3Signals"
-    ]
-
+    fields = ["level1Signals", "level2Signals", "level3Signals"]
     sizes = {f: [] for f in fields}
 
     for record in selected:
@@ -24,16 +20,19 @@ def analyze_signal_size_kb(json_file, start_id=594, end_id=665):
             val = record.get(field)
             if val is not None:
                 try:
-                    size_kb = len(json.dumps(val, ensure_ascii=False).encode("utf-8")) / 1024
+                    size_kb = len(json.dumps(val, ensure_ascii=False).encode("utf-8")) /1024
                     sizes[field].append(size_kb)
                 except Exception:
                     continue
 
-    print(f"✅ 信号字段平均体积统计 (id: {start_id} ~ {end_id})")
+    print(f"✅ 信号字段体积统计 (id: {start_id} ~ {end_id})")
     for field, kb_list in sizes.items():
         if kb_list:
-            avg_kb = sum(kb_list) / len(kb_list)
-            print(f"{field:15s} → 平均大小: {avg_kb:.3f} KB (样本数: {len(kb_list)})")
+            n = len(kb_list)
+            avg_kb = sum(kb_list) / n
+            variance = sum((x - avg_kb) ** 2 for x in kb_list) / n
+            std_dev = variance ** 0.5
+            print(f"{field:15s} → 平均: {avg_kb:.3f} KB | 方差: {variance:.3f} | 标准差: {std_dev:.3f} (样本数: {n})")
         else:
             print(f"{field:15s} → 无数据")
 

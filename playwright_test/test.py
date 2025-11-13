@@ -32,7 +32,7 @@ with sync_playwright() as p:
 
     # 等待跳转到 test.html
     page.wait_for_url("**/test.html", timeout=5000)
-    #page.wait_for_timeout(3000)  # 等待指纹采集、POST完成
+    page.wait_for_timeout(3000)  # 等待指纹采集、POST完成
     browser.close()
     print("✅ 登录成功，已跳转到:", page.url)
 
