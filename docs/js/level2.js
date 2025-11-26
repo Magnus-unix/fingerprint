@@ -9,8 +9,8 @@ async function getLevel2Signals() {
     signals.languages = navigator.languages || [];
 
     // UA 和 platform 一致性
-    signals.uaPlatformMismatch = (signals.userAgent.includes("Windows") && signals.platform.toLowerCase().includes("linux")) ||
-                                 (signals.userAgent.includes("Mac") && signals.platform.toLowerCase().includes("win")) ||
+    signals.uaPlatformMismatch = (signals.userAgent.includes("windows") && signals.platform.toLowerCase().includes("linux")) ||
+                                 (signals.userAgent.includes("mac") && signals.platform.toLowerCase().includes("win")) ||
                                  (signals.userAgent.includes("linux") && signals.platform.toLocaleLowerCase().includes("mac"));
 
     // ✅ WebGL
