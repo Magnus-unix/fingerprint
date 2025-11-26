@@ -46,6 +46,7 @@
       // 点击按钮时的时间
       const t_end = Date.now();
       const delta_time = (t_end - t_start) / 1000;  // 秒，浮点数
+      console.log("delta_time", delta_time);
 
       const response = await fetch("https://skyeker.top/login", {
           method: 'POST',
