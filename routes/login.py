@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, redirect, url_for, jsonify
+from flask import Blueprint, request, render_template, redirect, url_for, jsonify, session
 from models.user import User
 from models.record import LoginRecord
 from extensions import db
@@ -12,34 +12,48 @@ login_bp = Blueprint('login', __name__)
 def index():
     return redirect(url_for('login.login'))  # 注意这里 login.login 是蓝图+视图名
 
-from flask import make_response
+from flask import make_response,current_app
 
 @login_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    fingerprint = data.get('fingerprint')  # 只记录指纹
+    fingerprint = data.get('fingerprint')  
+    delta = data.get('delta_time')
+
+    current_app.logger.info(f"[LOGIN DEBUG] Received delta_time = {delta}")
+    current_app.logger.info(f"[LOGIN DEBUG] Raw POST data = {data}")
 
     user = User.query.filter_by(username=username).first()
     success = user and user.password == password
 
-    # 记录登录信息
-    record = LoginRecord(
-        username=username,
-        fingerprint=fingerprint,
-        timestamp=datetime.utcnow()
-    )
-    db.session.add(record)
-    db.session.commit()
+    # ---- ⭐ 带 try/except 的数据库写入 ----
+    try:
+        record = LoginRecord(
+            username=username,
+            fingerprint=fingerprint,
+            timestamp=datetime.utcnow(),
+            delta_time=delta
+        )
+        db.session.add(record)
+        db.session.commit()
 
-    # 创建响应对象
+        current_app.logger.info(f"[DB OK] LoginRecord saved. id={record.id}, delta_time={delta}")
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(
+            f"[DB ERROR] Failed to insert LoginRecord: {str(e)}",
+            exc_info=True
+        )
+
+    # ---- 返回响应 ----
     resp = make_response(jsonify({
         'success': success,
         'message': '登录成功' if success else '用户名或密码错误'
     }))
 
-    # 登录成功时设置 cookie，有效期 30 天
     if success:
         cookie_value = f"{username}:{password}"  
         resp.set_cookie(
@@ -51,6 +65,7 @@ def login():
             samesite='None'
         )
     return resp
+
 
 @login_bp.route('/login', methods=['GET'])
 def login_page():
