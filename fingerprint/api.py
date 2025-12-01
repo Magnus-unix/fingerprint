@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from models.record import LoginRecord
 from extensions import db
 from datetime import datetime
@@ -11,6 +11,10 @@ def collect_fingerprint():
     data = request.get_json()
     username = data.get('username')
     fingerprint = data.get('fingerprint', {})
+    delta = data.get('delta_time')
+
+    current_app.logger.info(f"[LOGIN DEBUG] Received delta_time = {delta}")
+    current_app.logger.info(f"[LOGIN DEBUG] Raw POST data = {data}")
     url = data.get('url', '')
 
     # ✅ 真实 IP 获取（优先 X-Forwarded-For）

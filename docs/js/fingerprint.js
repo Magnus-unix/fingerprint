@@ -65,13 +65,6 @@ async function getFingerprint(username = '') {
 
         const url = window.location.href;
 
-        const res = await fetch("https://skyeker.top/fingerprint", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, fingerprint, url }),
-            credentials: 'include'
-        });
-
         const data = await res.json();
         return data.fingerprint;
     } catch (e) {
