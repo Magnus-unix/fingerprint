@@ -19,35 +19,9 @@ def login():
     data = request.get_json()
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    fingerprint = data.get('fingerprint')  
-    delta = data.get('delta_time')
-
-    current_app.logger.info(f"[LOGIN DEBUG] Received delta_time = {delta}")
-    current_app.logger.info(f"[LOGIN DEBUG] Raw POST data = {data}")
 
     user = User.query.filter_by(username=username).first()
     success = user and user.password == password
-
-    # ---- ⭐ 带 try/except 的数据库写入 ----
-    try:
-        record = LoginRecord(
-            username=username,
-            fingerprint=fingerprint,
-            timestamp=datetime.utcnow(),
-            delta_time=delta
-        )
-        db.session.add(record)
-        db.session.commit()
-
-        current_app.logger.info(f"[DB OK] LoginRecord saved. id={record.id}, delta_time={delta}")
-
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(
-            f"[DB ERROR] Failed to insert LoginRecord: {str(e)}",
-            exc_info=True
-        )
-
     # ---- 返回响应 ----
     resp = make_response(jsonify({
         'success': success,
@@ -65,7 +39,6 @@ def login():
             samesite='None'
         )
     return resp
-
 
 @login_bp.route('/login', methods=['GET'])
 def login_page():
