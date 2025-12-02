@@ -33,12 +33,12 @@ async function getFingerprint(username = '') {
         timing.level3 = performance.now() - t1;
 
         t1 = performance.now();
-        const mouseData = getMouseMovementData();
-        timing.mouse = performance.now() - t1;
+        const interactionData = getInteractionTrace();
+        timing.interaction = performance.now() - t1;
 
-        t1 = performance.now();
-        const keyboardData = getKeyboardData();
-        timing.keyboard = performance.now() - t1;
+        // t1 = performance.now();
+        // const keyboardData = getKeyboardData();
+        // timing.keyboard = performance.now() - t1;
 
         // --- 总耗时 ---
         const totalEnd = performance.now();
@@ -54,11 +54,8 @@ async function getFingerprint(username = '') {
             level1Signals,
             level2Signals,
             level3Signals,
-            mouseData,
-            keyboardData,
+            interactionData,
             timing,
-            totalStart,
-            totalEnd,
             duration
         };
 
