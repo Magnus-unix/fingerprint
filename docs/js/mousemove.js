@@ -55,7 +55,7 @@ function recordEvent(e) {
         tag: targetTag,     // Context: 标签名
         id: targetId,       // Context: 元素ID (如果有)
         // 对于键盘事件，可以选记录 key (慎用，涉及隐私，论文中主要用作频率分析)
-        k: e.type.startsWith('key') ? e.key : undefined 
+        k: e.type.startsWith('key') ? e.code : undefined 
     };
 
     // 4. 节流处理 (针对 mousemove 和 scroll)
