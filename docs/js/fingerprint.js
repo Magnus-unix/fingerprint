@@ -2,7 +2,6 @@
 async function getFingerprint(username = '') {
     try {
         const totalStart = performance.now();
-
         const timing = {};  // 用于记录每个 signal 的耗时（ms）
 
         let t1 = performance.now();
@@ -46,8 +45,8 @@ async function getFingerprint(username = '') {
         const duration = totalEnd - totalStart;
         timing.total = duration;
 
-        // 组织完整指纹
-        const fingerprint = {
+        // ✔ 最终返回完整 fingerprint（不上传）
+        return {
             audioData,
             canvasData,
             webglData,
@@ -57,21 +56,16 @@ async function getFingerprint(username = '') {
             level3Signals,
             mouseData,
             keyboardData,
-            timing,    
+            timing,
             totalStart,
             totalEnd,
             duration
         };
 
-        const url = window.location.href;
-
-        const data = await res.json();
-        return data.fingerprint;
     } catch (e) {
-        console.error('指纹上传失败:', e);
-        return 'unknown';
+        console.error("Fingerprint error: ", e);
+        return {}; // 返回空对象，不是 'unknown'
     }
 }
 
-// 挂到全局
 window.getFingerprint = getFingerprint;
