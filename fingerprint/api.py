@@ -36,7 +36,9 @@ def collect_fingerprint():
         url=url,
         ip=ip,
         cookie=cookie,
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
+        delta_time=delta
+
     )
     db.session.add(record)
     db.session.commit()

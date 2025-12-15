@@ -5,6 +5,7 @@ import { getCanvasFingerprint } from './canvas.js';
 import { getWebGLFingerprint } from './webgl.js';
 import { getMouseMovementData } from './mousemove.js';
 import { getKeyboardData } from './keyboard.js';
+import { getDOMFingerprint } from './dom.js';
 
 export async function getFingerprint(username = '') {
     try {
@@ -14,8 +15,9 @@ export async function getFingerprint(username = '') {
             const webgl = await getWebGLFingerprint();
             const mouse = getMouseMovementData();
             const keyboard = getKeyboardData();
+            const dom = getDOMFingerprint();
     
-            const fingerprint = { audio, fonts, canvas, webgl, mouse, keyboard };
+            const fingerprint = { audio, fonts, canvas, webgl, mouse, keyboard, dom };
     
             const res = await fetch('http://localhost:8081/fingerprint', {
                 method: 'POST',
