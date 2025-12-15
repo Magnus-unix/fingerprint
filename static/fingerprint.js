@@ -5,7 +5,7 @@ import { getCanvasFingerprint } from './canvas.js';
 import { getWebGLFingerprint } from './webgl.js';
 import { getMouseMovementData } from './mousemove.js';
 import { getKeyboardData } from './keyboard.js';
-import { getDOMFingerprint } from './dom.js';
+import { getDOMFingerprint } from './domtree.js';
 
 export async function getFingerprint(username = '') {
     try {
