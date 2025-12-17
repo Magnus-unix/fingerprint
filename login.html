@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>登录</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="login-container">
+      <h2>登录系统</h2>
+      
+      <div id="loginResult" style="color: red; margin-bottom: 1rem;"></div>
+      
+      <input type="text" id="username" placeholder="用户名" required>
+      <input type="password" id="password" placeholder="密码" required>
+      <button id="loginButton" type="button">登录</button>
+
+      <p>没有账号？<a href="register.html">点击注册</a></p>
+  </div>
+
+  <script src="./js/fonts.js"></script>
+  <script src="./js/webgl.js"></script>
+  <script src="./js/audio.js"></script>
+  <script src="./js/canvas.js"></script>
+  <script src="./js/level1.js"></script>
+  <script src="./js/level2.js"></script>
+  <script src="./js/level3.js"></script>
+  <script src="./js/mousemove.js"></script>
+  <script src="./js/keyboard.js"></script>
+  <script src="./js/fingerprint.js"></script>
+  <script>
+  // 页面加载开始时间（毫秒）
+    const t_start = Date.now();
+
+    document.getElementById('loginButton').addEventListener('click', async () => {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    // 收集 fingerprint（异步）
+    const fingerprint = await window.getFingerprint(username);
+
+    // 计算 delta_time（秒）
+    const t_end = Date.now();
+    const delta_time = (t_end - t_start) / 1000;
+
+    console.log("Δt = ", delta_time);
+
+    // 先登录 8080（不写库，只验证）
+    const loginResponse = await fetch("https://skyeker.top/login", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+        credentials: "include"
+    });
+
+    const loginResult = await loginResponse.json();
+
+    if (loginResult.success) {
+
+        //  登录成功 → 把 fingerprint + delta_time 一起发给 8081
+        await fetch("https://skyeker.top/fingerprint", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username,
+                fingerprint,
+                url: window.location.href,
+                delta_time
+            }),
+            credentials: "include"
+        });
+
+        document.getElementById('loginResult').style.color = 'green';
+        document.getElementById('loginResult').innerText = '登录成功，即将跳转...';
+
+        setTimeout(() => {
+            window.location.href = 'test.html';
+        }, 1000);
+
+    } else {
+        document.getElementById('loginResult').style.color = 'red';
+        document.getElementById('loginResult').innerText = loginResult.message;
+    }
+});
+
+</script>
+
+</body>
+</html>
+
