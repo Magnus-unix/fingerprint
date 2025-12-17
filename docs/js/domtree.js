@@ -1,4 +1,3 @@
-// static/dom.js
 
 /**
  * DOM 收集器 - 用于区分 LLM Bot 与 传统 Bot
@@ -88,7 +87,7 @@ function collectHoneypotStatus() {
  * 导出主函数：获取 DOM 指纹数据
  * 注意：这里不再发送请求，而是返回对象
  */
-export function getDOMFingerprint() {
+function getDOMFingerprint() {
     try {
         return {
             viewport: {
@@ -105,3 +104,5 @@ export function getDOMFingerprint() {
         return null;
     }
 }
+
+window.getDOMFingerprint = getDOMFingerprint;
