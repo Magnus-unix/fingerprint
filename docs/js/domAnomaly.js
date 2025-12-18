@@ -1,6 +1,6 @@
 (function () {
 
-  function getDOMFingerprint() {
+  function initDOMAnomalyProbe() {
     const logs = [];
 
     function log(type, msg) {
@@ -12,91 +12,70 @@
     }
 
     // ===============================
-    // Strategy A: Ghost Honeypot
+    // 启动监听（关键）
     // ===============================
-    function injectHoneypot() {
+    function start() {
+
+      // A. 注入 honeypot
       const trap = document.createElement('input');
       trap.type = 'text';
       trap.name = 'email_confirmation';
-      trap.id = 'confirm_user_entry';
       trap.tabIndex = -1;
-      trap.autocomplete = 'off';
 
       Object.assign(trap.style, {
         position: 'absolute',
         left: '-9999px',
-        top: '0',
-        opacity: '0.01',
-        height: '1px',
-        width: '1px',
-        pointerEvents: 'none'
+        opacity: '0.01'
       });
 
-      const handler = () => {
-        log('ghost_interaction', 'ghost input was focused or modified');
-      };
-
-      trap.addEventListener('focus', handler);
-      trap.addEventListener('input', handler);
-      trap.addEventListener('change', handler);
+      const trigger = () => log('honeypot', 'ghost input touched');
+      trap.addEventListener('focus', trigger);
+      trap.addEventListener('input', trigger);
 
       document.body.appendChild(trap);
-    }
 
-    // ===============================
-    // Strategy B: Input Anomaly Monitor
-    // ===============================
-    function monitorInputs() {
-      const inputs = document.querySelectorAll(
-        'input[type="text"], input[type="password"]'
-      );
-
-      inputs.forEach(input => {
-        let lastKeyTs = 0;
+      // B. 监听真实输入框
+      document.querySelectorAll('input').forEach(input => {
+        let last = 0;
 
         input.addEventListener('keydown', () => {
           const now = Date.now();
-          if (lastKeyTs && now - lastKeyTs < 5) {
-            log('super_human_speed', `keystroke interval: ${now - lastKeyTs}ms`);
+          if (last && now - last < 5) {
+            log('speed', `superhuman typing: ${now - last}ms`);
           }
-          lastKeyTs = now;
+          last = now;
         });
 
-        input.addEventListener('input', (e) => {
+        input.addEventListener('input', e => {
           if (!e.isTrusted) {
-            log('untrusted_event', 'input event is not trusted');
-          }
-          if (e.inputType === 'insertFromPaste') {
-            log('paste_detected', 'paste detected');
+            log('untrusted', 'script-generated input');
           }
         });
       });
     }
 
-    // ===============================
-    // Execute (idempotent)
-    // ===============================
+    // ⚠️ 立即启动
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        injectHoneypot();
-        monitorInputs();
-      });
+      document.addEventListener('DOMContentLoaded', start);
     } else {
-      injectHoneypot();
-      monitorInputs();
+      start();
     }
 
     // ===============================
-    // Public result interface
+    // 对外只暴露 export
     // ===============================
     return {
       type: 'dom_anomaly_probe',
-      logs,
-      collectedAt: Date.now()
+      export() {
+        return {
+          logs: [...logs],
+          count: logs.length,
+          collectedAt: Date.now()
+        };
+      }
     };
   }
 
-  // 暴露统一接口（与 domTree 保持一致）
-  window.getDOMFingerprint = getDOMFingerprint;
+  window.initDOMAnomalyProbe = initDOMAnomalyProbe;
 
 })();
