@@ -1,7 +1,7 @@
 // fingerprint.js
 async function getFingerprint(username = '') {
     try {
-        const domProbe = initDOMAnomalyProbe();
+        // const domProbe = initDOMAnomalyProbe();
         const totalStart = performance.now();
         const timing = {};  // 用于记录每个 signal 的耗时（ms）
 
@@ -42,7 +42,7 @@ async function getFingerprint(username = '') {
         timing.keyboard = performance.now() - t1;
 
         t1 = performance.now();
-        const domData = domProbe.export();
+        const domData = getDOMFingerprint();
         timing.dom = performance.now() - t1;
 
         // --- 总耗时 ---
