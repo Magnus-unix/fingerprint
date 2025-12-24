@@ -1,9 +1,7 @@
 (function () {
   // 配置项
-  window.__domConfig__ = {
-    ANALYSIS_WINDOW_MS,   // 只分析最近 5 秒的行为
-    MAX_HISTORY_LENGTH    // 只保留最近 1000 次 DOM 操作记录
-  };
+  MAX_HISTORY_LENGTH = 1000;
+  ANALYSIS_WINDOW_MS = 10000;
 
   const stats = {
     qs: 0,
@@ -40,6 +38,10 @@
   };
 
   window.__domStats__ = stats;
+  window.__domConfig__ = {
+    ANALYSIS_WINDOW_MS,   // 只分析最近 5 秒的行为
+    MAX_HISTORY_LENGTH    // 只保留最近 1000 次 DOM 操作记录
+  };
 })();
 
 // Human Hooks 保持不变...
@@ -96,6 +98,7 @@ function analyzeBehavior() {
   return {
     windowMs: windowMs,
     dom: {
+      domRaw: dom,
       totalAccess: recentTimestamps.length,
       qsCount: recentOps.filter(op => op === 1).length,
       layoutCount,
