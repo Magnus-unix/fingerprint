@@ -4,11 +4,11 @@
 
   const stats = {
     qs: 0,
+    qsAll: 0,           // 👈 新增
     layoutReads: 0,
     timestamps: [],
-    ops: [],
+    ops: [],            // 1=qs, 2=layout, 3=qsAll
 
-    // --- 新增：行为耦合指标 ---
     domAfterHumanCount: 0,
     domDuringKeyCount: 0,
     preClickDomCount: 0
@@ -32,53 +32,51 @@
     lastClickTs = performance.now();
   }, { passive: true });
 
-  function isIgnoredNode(node) {
-    return node && node.closest && node.closest('[data-dom-ignore]');
-  }
-
   function record(type, node) {
-    if (node && isIgnoredNode(node)) return;
+    //可能要加ignore
+
     const now = performance.now();
-
     stats[type]++;
+
     stats.timestamps.push(now);
-    stats.ops.push(type === 'qs' ? 1 : 2);
+    stats.ops.push(
+      type === 'qs' ? 1 :
+        type === 'layoutReads' ? 2 :
+          3 // qsAll
+    );
 
-    // --- ① DOM-after-Human ---
-    if (now - lastHumanEventTs >= 0 && now - lastHumanEventTs <= 80) {
-      stats.domAfterHumanCount++;
-    }
+    // 行为耦合指标（你原来的逻辑）
+    if (now - lastHumanEventTs <= 80) stats.domAfterHumanCount++;
+    if (keydownActive) stats.domDuringKeyCount++;
+    if (lastClickTs && now - lastClickTs <= 120) stats.preClickDomCount++;
 
-    // --- ② DOM-during-Keydown ---
-    if (keydownActive) {
-      stats.domDuringKeyCount++;
-    }
-
-    // --- ③ Pre-click DOM ---
-    if (lastClickTs && now - lastClickTs <= 120) {
-      stats.preClickDomCount++;
-    }
-
-
-    // --- 内存保护 ---
     if (stats.timestamps.length > MAX_HISTORY_LENGTH) {
       stats.timestamps.shift();
       stats.ops.shift();
     }
   }
 
+
   // --- Hook DOM API ---
   const qs = Element.prototype.querySelector;
+  const qsAll = Element.prototype.querySelectorAll;
+  const gbr = Element.prototype.getBoundingClientRect;
+
   Element.prototype.querySelector = function (sel) {
     record('qs', this);
     return qs.call(this, sel);
   };
 
-  const gbr = Element.prototype.getBoundingClientRect;
+  Element.prototype.querySelectorAll = function (sel) {
+    record('qsAll', this);
+    return qsAll.call(this, sel);
+  };
+
   Element.prototype.getBoundingClientRect = function () {
     record('layoutReads', this);
     return gbr.call(this);
   };
+
 
   // --- 对外暴露 ---
   window.__domStats__ = stats;
@@ -119,11 +117,17 @@ function analyzeBehavior() {
     if (recentOps[i] === 2) layoutCount++;
   }
 
+  const qsCount = recentOps.filter(op => op === 1).length;
+  const hookLayoutCount = recentOps.filter(op => op === 2).length;
+  const qsAllCount = recentOps.filter(op => op === 3).length;
+
   return {
     windowMs,
     dom: {
       totalAccess: recentTimestamps.length,
-      qsCount: recentOps.filter(op => op === 1).length,
+      qsCount: qsCount,
+      hookLayoutCount: hookLayoutCount,
+      qsAllCount: qsAllCount,
       layoutCount,
       burstCount,
       minInterval: isFinite(minInterval) ? minInterval : null,

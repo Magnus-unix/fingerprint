@@ -41,9 +41,8 @@ async function getFingerprint(username = '') {
         const keyboardData = getKeyboardData();
         timing.keyboard = performance.now() - t1;
 
-        t1 = performance.now();
         const domData = getDomAnomaly();
-        timing.dom = performance.now() - t1;
+        const honeypotData = getHoneypot();
 
         // --- 总耗时 ---
         const totalEnd = performance.now();
@@ -62,6 +61,7 @@ async function getFingerprint(username = '') {
             interactionData,
             keyboardData,
             domData,
+            honeypotData,
             timing,
             duration
         };
