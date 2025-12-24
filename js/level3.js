@@ -114,7 +114,6 @@ async function getLevel3Signals() {
     try {
         const availableFonts = await getFontsFingerprint();
         signals.fontsCount = availableFonts.length;
-        //signals.fontsList = availableFonts; // 如果要看具体字体，可以加上
     } catch (e) {
         signals.fontsError = e.toString();
     }
