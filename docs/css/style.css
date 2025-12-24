@@ -1,28 +1,69 @@
+/* ================= 全局设定 ================= */
 body {
+    margin: 0;
+    overflow: hidden; /* 防止 D3 撑出滚动条 */
     font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
+    
+    /* 核心改动：深色背景适配 D3 */
+    background-color: #0d1117;
+    
+    /* 核心布局：Flexbox 居中 */
     display: flex;
     height: 100vh;
     align-items: center;
     justify-content: center;
 }
 
-.login-container {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
+/* ================= D3 背景动画层 ================= */
+#d3-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1; /* 在最底层，但在 body 之上 */
+    pointer-events: none; /* 让鼠标事件穿透背景 */
 }
 
+/* D3 节点线条样式 */
+.node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+/* ================= 登录框容器 ================= */
+.login-container {
+    position: relative;
+    z-index: 10; /* 确保浮在动画之上 */
+    
+    /* 白色背景带一点透明度 */
+    background: rgba(255, 255, 255, 0.96);
+    
+    width: 300px;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* 加深阴影适配深色背景 */
+    text-align: center;
+    
+    /* 加上这个防止 padding 撑破宽度 */
+    box-sizing: border-box; 
+}
+
+/* ================= 登录框内部组件 ================= */
 .login-container h2 {
     margin-bottom: 1.5rem;
+    color: #333;
 }
 
 .login-container input {
     display: block;
     width: 100%;
+    box-sizing: border-box; /* 关键修正 */
     padding: 10px;
     margin: 0.5rem 0;
     border: 1px solid #ccc;
@@ -37,6 +78,8 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s; /* 加个过渡效果更顺滑 */
 }
 
 .login-container button:hover {
@@ -49,10 +92,5 @@ body {
     margin-bottom: 1rem;
 }
 
-.flash-messages .success {
-    color: green;
-}
-
-.flash-messages .error {
-    color: red;
-}
+.flash-messages .success { color: green; }
+.flash-messages .error { color: red; }
