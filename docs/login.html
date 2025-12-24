@@ -6,29 +6,29 @@
     <title>登录</title>
     <!-- 引入 D3.js 核心库 -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
+    <body>
+        <!-- D3 动画挂载点 -->
+        <div id="d3-background"></div>
 
-    <!-- D3 动画挂载点 -->
-    <div id="d3-background" data-dom-ignore="true"></div>
+        <div class="login-container">
+            <h2>登录系统</h2>
+
+            <div id="loginResult" style="color: red; margin-bottom: 1rem;"></div>
+
+            <input type="text" id="username" placeholder="用户名" required>
+            <input type="password" id="password" placeholder="密码" required>
+            <button id="loginButton" type="button">登录</button>
+
+            <p>没有账号？<a href="register.html">点击注册</a></p>
+        </div>
+
+    </body>
     <script src="./js/background-anim.js"></script>
-    
-    <div class="login-container">
-        <h2>登录系统</h2>
-
-        <div id="loginResult" style="color: red; margin-bottom: 1rem;"></div>
-
-        <input type="text" id="username" placeholder="用户名" required>
-        <input type="password" id="password" placeholder="密码" required>
-        <button id="loginButton" type="button">登录</button>
-
-        <p>没有账号？<a href="register.html">点击注册</a></p>
-    </div>
-
-
     <!-- 原有的检测脚本 -->
     <script src="./js/fonts.js"></script>
     <script src="./js/webgl.js"></script>

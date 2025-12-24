@@ -55,9 +55,10 @@
     }
 
     // --- ③ Pre-click DOM ---
-    if (lastClickTs && lastClickTs - now >= 0 && lastClickTs - now <= 120) {
+    if (lastClickTs && now - lastClickTs <= 120) {
       stats.preClickDomCount++;
     }
+
 
     // --- 内存保护 ---
     if (stats.timestamps.length > MAX_HISTORY_LENGTH) {
@@ -73,6 +74,7 @@
     return qs.call(this, sel);
   };
 
+  const gbr = Element.prototype.getBoundingClientRect;
   Element.prototype.getBoundingClientRect = function () {
     record('layoutReads', this);
     return gbr.call(this);
