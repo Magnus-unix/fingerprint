@@ -1,7 +1,9 @@
 (function () {
   // 配置项
-  const MAX_HISTORY_LENGTH = 1000; // 只保留最近 1000 次 DOM 操作记录
-  const ANALYSIS_WINDOW_MS = 10000; // 只分析最近 5 秒的行为
+  window.__domConfig__ = {
+    ANALYSIS_WINDOW_MS,   // 只分析最近 5 秒的行为
+    MAX_HISTORY_LENGTH    // 只保留最近 1000 次 DOM 操作记录
+  };
 
   const stats = {
     qs: 0,
@@ -53,13 +55,16 @@ let lastHumanEvent = { timestamp: performance.now(), type: 'load' };
 
 function analyzeBehavior() {
   const dom = window.__domStats__;
+  const config = window.__domConfig__;
   const now = performance.now();
+
+  const windowMs = config.ANALYSIS_WINDOW_MS;
   if (!dom) return null;
 
   // 1. 只保留最近 ANALYSIS_WINDOW_MS
   let startIndex = 0;
   for (let i = dom.timestamps.length - 1; i >= 0; i--) {
-    if (now - dom.timestamps[i] > ANALYSIS_WINDOW_MS) {
+    if (now - dom.timestamps[i] > windowMs) {
       startIndex = i + 1;
       break;
     }
@@ -89,7 +94,7 @@ function analyzeBehavior() {
   const humanGap = now - lastHumanEvent.timestamp;
 
   return {
-    windowMs: ANALYSIS_WINDOW_MS,
+    windowMs: windowMs,
     dom: {
       totalAccess: recentTimestamps.length,
       qsCount: recentOps.filter(op => op === 1).length,
