@@ -1,69 +1,100 @@
 (function () {
-  // 配置项
-  MAX_HISTORY_LENGTH = 1000;
-  ANALYSIS_WINDOW_MS = 10000;
+  const MAX_HISTORY_LENGTH = 1000;
+  const ANALYSIS_WINDOW_MS = 10000;
 
   const stats = {
     qs: 0,
     layoutReads: 0,
-    // 改造：不再无限存储，而是虽然 push 但定期清理，或者用 RingBuffer
     timestamps: [],
-    ops: [] // 额外记录操作类型，用于区分是 qs 还是 layout
+    ops: [],
+
+    // --- 新增：行为耦合指标 ---
+    domAfterHumanCount: 0,
+    domDuringKeyCount: 0,
+    preClickDomCount: 0
   };
 
-  function record(type) {
+  // --- 人类事件状态 ---
+  let lastHumanEventTs = performance.now();
+  let keydownActive = false;
+  let lastClickTs = null;
+
+  // --- 事件监听 ---
+  ['mousemove', 'mousedown', 'keydown', 'keyup', 'scroll', 'touchstart'].forEach(e => {
+    addEventListener(e, evt => {
+      lastHumanEventTs = performance.now();
+      if (evt.type === 'keydown') keydownActive = true;
+      if (evt.type === 'keyup') keydownActive = false;
+    }, { passive: true });
+  });
+
+  addEventListener('click', () => {
+    lastClickTs = performance.now();
+  }, { passive: true });
+
+  function isIgnoredNode(node) {
+    return node && node.closest && node.closest('[data-dom-ignore]');
+  }
+
+  function record(type, node) {
+    if (node && isIgnoredNode(node)) return;
     const now = performance.now();
+
     stats[type]++;
     stats.timestamps.push(now);
-    stats.ops.push(type === 'qs' ? 1 : 2); // 1: qs, 2: layout
+    stats.ops.push(type === 'qs' ? 1 : 2);
 
-    // 简单的内存保护：超过最大长度就剔除旧的
+    // --- ① DOM-after-Human ---
+    if (now - lastHumanEventTs >= 0 && now - lastHumanEventTs <= 80) {
+      stats.domAfterHumanCount++;
+    }
+
+    // --- ② DOM-during-Keydown ---
+    if (keydownActive) {
+      stats.domDuringKeyCount++;
+    }
+
+    // --- ③ Pre-click DOM ---
+    if (lastClickTs && lastClickTs - now >= 0 && lastClickTs - now <= 120) {
+      stats.preClickDomCount++;
+    }
+
+    // --- 内存保护 ---
     if (stats.timestamps.length > MAX_HISTORY_LENGTH) {
       stats.timestamps.shift();
       stats.ops.shift();
     }
   }
 
-  // Hook 逻辑保持不变...
+  // --- Hook DOM API ---
   const qs = Element.prototype.querySelector;
   Element.prototype.querySelector = function (sel) {
-    record('qs');
+    record('qs', this);
     return qs.call(this, sel);
   };
 
-  const gbr = Element.prototype.getBoundingClientRect;
   Element.prototype.getBoundingClientRect = function () {
-    record('layoutReads');
+    record('layoutReads', this);
     return gbr.call(this);
   };
 
+  // --- 对外暴露 ---
   window.__domStats__ = stats;
   window.__domConfig__ = {
-    ANALYSIS_WINDOW_MS,   // 只分析最近 5 秒的行为
-    MAX_HISTORY_LENGTH    // 只保留最近 1000 次 DOM 操作记录
+    ANALYSIS_WINDOW_MS
   };
 })();
 
-// Human Hooks 保持不变...
-let lastHumanEvent = { timestamp: performance.now(), type: 'load' };
-['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(e => {
-  addEventListener(e, (evt) => {
-    lastHumanEvent.timestamp = performance.now();
-    lastHumanEvent.type = evt.type;
-  }, { passive: true });
-});
-
-// --- 改进后的分析逻辑 ---
 
 function analyzeBehavior() {
   const dom = window.__domStats__;
-  const config = window.__domConfig__;
+  const cfg = window.__domConfig__;
+  if (!dom || !cfg) return null;
+
   const now = performance.now();
+  const windowMs = cfg.ANALYSIS_WINDOW_MS;
 
-  const windowMs = config.ANALYSIS_WINDOW_MS;
-  if (!dom) return null;
-
-  // 1. 只保留最近 ANALYSIS_WINDOW_MS
+  // 过滤最近 windowMs
   let startIndex = 0;
   for (let i = dom.timestamps.length - 1; i >= 0; i--) {
     if (now - dom.timestamps[i] > windowMs) {
@@ -75,40 +106,30 @@ function analyzeBehavior() {
   const recentTimestamps = dom.timestamps.slice(startIndex);
   const recentOps = dom.ops.slice(startIndex);
 
-  // 2. 统计指标
   let burstCount = 0;
   let layoutCount = 0;
-  let layoutThrashingCount = 0;
   let minInterval = Infinity;
 
   for (let i = 1; i < recentTimestamps.length; i++) {
     const delta = recentTimestamps[i] - recentTimestamps[i - 1];
-
     if (delta < 4) burstCount++;
     if (delta < minInterval) minInterval = delta;
-
-    if (recentOps[i] === 2) {
-      layoutCount++;
-      if (delta < 10) layoutThrashingCount++;
-    }
+    if (recentOps[i] === 2) layoutCount++;
   }
 
-  const humanGap = now - lastHumanEvent.timestamp;
-
   return {
-    windowMs: windowMs,
+    windowMs,
     dom: {
-      domRaw: dom,
       totalAccess: recentTimestamps.length,
       qsCount: recentOps.filter(op => op === 1).length,
       layoutCount,
       burstCount,
-      layoutThrashingCount,
-      minInterval: isFinite(minInterval) ? minInterval : null
-    },
-    human: {
-      timeSinceLastEvent: humanGap,
-      lastEventType: lastHumanEvent.type
+      minInterval: isFinite(minInterval) ? minInterval : null,
+
+      // --- 新增三项 ---
+      domAfterHumanCount: dom.domAfterHumanCount,
+      domDuringKeyCount: dom.domDuringKeyCount,
+      preClickDomCount: dom.preClickDomCount
     }
   };
 }

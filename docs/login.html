@@ -1,91 +1,150 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
-  <meta charset="UTF-8">
-  <title>登录</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <!-- 引入 D3.js 核心库 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* 新增的 D3 背景样式，为了不影响 style.css，直接写在这里或合并进去 */
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* 防止 SVG 撑出滚动条 */
+            background-color: #0d1117;
+            /* 深色背景 */
+        }
+
+        #d3-background {
+            position: fixed;
+            /* 固定定位，作为全屏背景 */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 确保登录框浮在动画上面 */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            /* 加一点背景色防止文字看不清 */
+            /* 如果原 css 已经居中，这里可能不需要额外的定位代码，保留原样即可 */
+            padding: 20px;
+            border-radius: 8px;
+            margin: 100px auto;
+            /* 简单居中示例，根据你原有的 style.css 调整 */
+            width: 300px;
+        }
+
+        /* D3 元素样式 */
+        .node {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="login-container">
-      <h2>登录系统</h2>
-      
-      <div id="loginResult" style="color: red; margin-bottom: 1rem;"></div>
-      
-      <input type="text" id="username" placeholder="用户名" required>
-      <input type="password" id="password" placeholder="密码" required>
-      <button id="loginButton" type="button">登录</button>
 
-      <p>没有账号？<a href="register.html">点击注册</a></p>
-  </div>
+    <!-- D3 动画挂载点 -->
+    <div id="d3-background" data-dom-ignore="true"></div>
 
-  <script src="./js/fonts.js"></script>
-  <script src="./js/webgl.js"></script>
-  <script src="./js/audio.js"></script>
-  <script src="./js/canvas.js"></script>
-  <script src="./js/level1.js"></script>
-  <script src="./js/level2.js"></script>
-  <script src="./js/level3.js"></script>
-  <script src="./js/mousemove.js"></script>
-  <script src="./js/keyboard.js"></script>
-  <script src="./js/domAnomaly.js"></script>
-  <script src="./js/fingerprint.js"></script>
-  <script>
-  // 页面加载开始时间（毫秒）
-    const t_start = Date.now();
+    <div class="login-container">
+        <h2>登录系统</h2>
 
-    document.getElementById('loginButton').addEventListener('click', async () => {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+        <div id="loginResult" style="color: red; margin-bottom: 1rem;"></div>
 
-    // 收集 fingerprint（异步）
-    const fingerprint = await window.getFingerprint(username);
+        <input type="text" id="username" placeholder="用户名" required>
+        <input type="password" id="password" placeholder="密码" required>
+        <button id="loginButton" type="button">登录</button>
 
-    // 计算 delta_time（秒）
-    const t_end = Date.now();
-    const delta_time = (t_end - t_start) / 1000;
+        <p>没有账号？<a href="register.html">点击注册</a></p>
+    </div>
 
-    console.log("Δt = ", delta_time);
+    <script src="./js/background-anim.js"></script>
+    <!-- 原有的检测脚本 -->
+    
+    <script src="./js/fonts.js"></script>
+    <script src="./js/webgl.js"></script>
+    <script src="./js/audio.js"></script>
+    <script src="./js/canvas.js"></script>
+    <script src="./js/level1.js"></script>
+    <script src="./js/level2.js"></script>
+    <script src="./js/level3.js"></script>
+    <script src="./js/mousemove.js"></script>
+    <script src="./js/keyboard.js"></script>
+    <script src="./js/domAnomaly.js"></script>
+    <script src="./js/fingerprint.js"></script>
 
-    // 先登录 8080（不写库，只验证）
-    const loginResponse = await fetch("https://skyeker.top/login", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: "include"
-    });
+    <script>
+        // 页面加载开始时间（毫秒）
+        const t_start = Date.now();
 
-    const loginResult = await loginResponse.json();
+        document.getElementById('loginButton').addEventListener('click', async () => {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-    if (loginResult.success) {
+            // 收集 fingerprint（异步）
+            const fingerprint = await window.getFingerprint(username);
 
-        //  登录成功 → 把 fingerprint + delta_time 一起发给 8081
-        await fetch("https://skyeker.top/fingerprint", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username,
-                fingerprint,
-                url: window.location.href,
-                delta_time
-            }),
-            credentials: "include"
+            // 计算 delta_time（秒）
+            const t_end = Date.now();
+            const delta_time = (t_end - t_start) / 1000;
+
+            console.log("Δt = ", delta_time);
+
+            // 先登录 8080（不写库，只验证）
+            const loginResponse = await fetch("https://skyeker.top/login", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+                credentials: "include"
+            });
+
+            const loginResult = await loginResponse.json();
+
+            if (loginResult.success) {
+
+                //  登录成功 → 把 fingerprint + delta_time 一起发给 8081
+                await fetch("https://skyeker.top/fingerprint", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        fingerprint,
+                        url: window.location.href,
+                        delta_time
+                    }),
+                    credentials: "include"
+                });
+
+                document.getElementById('loginResult').style.color = 'green';
+                document.getElementById('loginResult').innerText = '登录成功，即将跳转...';
+
+                setTimeout(() => {
+                    window.location.href = 'test.html';
+                }, 1000);
+
+            } else {
+                document.getElementById('loginResult').style.color = 'red';
+                document.getElementById('loginResult').innerText = loginResult.message;
+            }
         });
-
-        document.getElementById('loginResult').style.color = 'green';
-        document.getElementById('loginResult').innerText = '登录成功，即将跳转...';
-
-        setTimeout(() => {
-            window.location.href = 'test.html';
-        }, 1000);
-
-    } else {
-        document.getElementById('loginResult').style.color = 'red';
-        document.getElementById('loginResult').innerText = loginResult.message;
-    }
-});
-
-</script>
+    </script>
 
 </body>
-</html>
 
+</html>
