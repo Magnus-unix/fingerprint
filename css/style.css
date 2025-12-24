@@ -17,8 +17,8 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 0;             /* 放到最底层 */
-    pointer-events: none;   /* 允许鼠标穿透，不阻塞点击/滚动 */
+    z-index: -1;             /* 放到最底层 */
+    /* pointer-events: none;   允许鼠标穿透，不阻塞点击/滚动 */
 }
 
 /* D3 节点和连线样式 */
