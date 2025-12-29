@@ -338,21 +338,21 @@
         //     }
         // }
 
-        // function loginPassword() {
-        //     var username = $("#unPassword").val();
-        //     if (username) {
-        //         username = username.trim();
-        //         loginPasswordInternal();
-        //         return;
-        //         $.ajax({
-        //             url: '/privacy/' + username,
-        //             success: function (res) {
-        //                 if (res.status === 'approved') loginPasswordInternal();
-        //                 else if (res.status === 'not') showRules();
-        //             }
-        //         });
-        //     }
-        // }
+        function loginPassword() {
+            var username = $("#unPassword").val();
+            if (username) {
+                username = username.trim();
+                loginPasswordInternal();
+                return;
+                $.ajax({
+                    url: '/privacy/' + username,
+                    success: function (res) {
+                        if (res.status === 'approved') loginPasswordInternal();
+                        else if (res.status === 'not') showRules();
+                    }
+                });
+            }
+        }
 
         // 这里是原来的函数声明
         const t_start = Date.now();
