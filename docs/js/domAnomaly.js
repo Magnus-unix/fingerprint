@@ -1,6 +1,6 @@
 (function () {
   const MAX_HISTORY_LENGTH = 1000;
-  const ANALYSIS_WINDOW_MS = 10000;
+  const ANALYSIS_WINDOW_MS = 60000;
 
   const stats = {
     qs: 0,
