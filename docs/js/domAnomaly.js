@@ -131,8 +131,6 @@ function analyzeBehavior() {
       layoutCount,
       burstCount,
       minInterval: isFinite(minInterval) ? minInterval : null,
-
-      // --- 新增三项 ---
       domAfterHumanCount: dom.domAfterHumanCount,
       domDuringKeyCount: dom.domDuringKeyCount,
       preClickDomCount: dom.preClickDomCount
