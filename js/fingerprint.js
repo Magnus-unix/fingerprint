@@ -42,7 +42,7 @@ async function getFingerprint(username = '') {
         timing.keyboard = performance.now() - t1;
 
         const domData = getDomAnomaly();
-        const honeypotData = getHoneypot();
+        const honeypotData = window.getHoneypot ? window.getHoneypot() : null;
         const mutationData = getMutationStats();
 
         // --- 总耗时 ---
