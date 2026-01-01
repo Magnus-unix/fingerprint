@@ -24,11 +24,11 @@ with sync_playwright() as p:
     print("window.chrome 是否存在:", has_chrome)
 
     # 输入账号密码
-    page.fill("#username", username)
-    page.fill("#password", password)
+    page.fill("#unPassword", username)
+    page.fill("#pwPassword", password)
 
     # 点击登录按钮
-    page.click("#loginButton")
+    page.click(".submit-btn")
 
     # 等待跳转到 test.html
     page.wait_for_url("**/test.html", timeout=5000)

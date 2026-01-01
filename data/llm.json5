@@ -1,0 +1,73 @@
+// nanobroswer
+"prompt": {
+    "prompt":"https://magnus-unix.github.io/fingerprint/login.html.
+    Please browse the page and click on the clickable areas, then attempt to log in using the username bot03 and password bot03"
+},
+"domData": {
+    "windowMs": 60000, //只分析最近60s的操作
+    "dom": {
+        "totalAccess": 42, //被hook到的dom api被调用的次数，包括querySelector、querySelectorAll、getBoundingClientRect
+        "qsCount": 0, // hook到的querySelector
+        "hookLayoutCount": 34, //hook到的getBoundingClientRect次数
+        "qsAllCount": 8, // hook到的querySelectorAll次数
+        "layoutCount": 34, //hook到的getBoundingClientRect次数
+        "burstCount": 12, //dom api 调用期间，有12次是在小于4ms之内发生的
+        "minInterval": 0, // 多次dom操作发生在同一个
+        "domAfterHumanCount": 0, //mousemove、keydown事件之后80ms内的dom操作
+        "domDuringKeyCount": 0, //在keydown持续期间的dom访问
+        "preClickDomCount": 0 //click事件发生前120ms内的的dom遍历次数
+    }
+},
+"mutationData": {
+    "totalMutations": 54, //Mutation Monitor 检测到class/style/id改变了54次
+    "uniqueNodes": 28, //有28个节点被改变过属性,包括llm打标签的行为和页面初始化过程的操作
+}
+// human
+"domData": {
+    "windowMs": 60000,
+    "dom": {
+        "totalAccess": 8,
+        "qsCount": 0,
+        "hookLayoutCount": 0,
+        "qsAllCount": 8,
+        "layoutCount": 0,
+        "burstCount": 7,
+        "minInterval": 0,
+        "domAfterHumanCount": 0,
+        "domDuringKeyCount": 0,
+        "preClickDomCount": 0
+    }
+},
+"mutationData": {
+    "totalMutations": 18,
+    "uniqueNodes": 10,
+}
+
+// bot03 with direct prompt
+"prompt": {
+    "prompt":
+"https://magnus-unix.github.io/fingerprint/login.html
+pls read the page and help me login the website with username bot03 and password bot03.
+After successful login, wait for 5 seconds and then close the page"
+},
+
+"domData": {
+        "windowMs": 60000,
+        "dom": {
+            "totalAccess": 14,
+            "qsCount": 0,
+            "hookLayoutCount": 6,
+            "qsAllCount": 8,
+            "layoutCount": 6,
+            "burstCount": 8,
+            "minInterval": 0,
+            "domAfterHumanCount": 0,
+            "domDuringKeyCount": 0,
+            "preClickDomCount": 0
+        }
+    },
+    "mutationData": {
+        "totalMutations": 15,
+        "uniqueNodes": 8,
+        "recordCount": 15,
+    }
