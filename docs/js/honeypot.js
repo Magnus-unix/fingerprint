@@ -3,7 +3,7 @@
     const CONFIG = {
         CONTAINER_ID: 'layout-helper-wrapper-' + Math.random().toString(36).slice(2, 7),
         // 假按钮的诱导性 ID，看起来比真的还真
-        FAKE_BTN_ID: 'btn-user-login-submit', 
+        FAKE_BTN_ID: 'loginbutton', 
         INPUT_NAME: 'website_url_honeypot'
     };
 
