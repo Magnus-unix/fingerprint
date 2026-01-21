@@ -28,7 +28,7 @@ with sync_playwright() as p:
     page.fill("#password", password)
 
     # 点击登录按钮
-    page.click("btn-user-login-submit")
+    page.click("#loginbutton")
     page.click("#loginButton")
 
     # 等待跳转到 test.html
