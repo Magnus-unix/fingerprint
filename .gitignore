@@ -16,3 +16,9 @@ Desktop.ini
 __pycache__/
 *.pyc
 
+node_modules/
+# src/
+build.js
+ts_src/
+static/
+templates/

@@ -1,0 +1,27 @@
+{
+  "name": "fingerprint",
+  "version": "1.0.0",
+  "description": "a repo for broswer fingerprint",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Magnus-unix/fingerprint.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Magnus-unix/fingerprint/issues"
+  },
+  "homepage": "https://github.com/Magnus-unix/fingerprint#readme",
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "fs-extra": "^11.3.3",
+    "html-minifier-terser": "^7.2.0",
+    "javascript-obfuscator": "^5.1.0"
+  }
+}
