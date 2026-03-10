@@ -112,3 +112,4 @@ async function getWebGLFingerprint() {
 }
 
 window.getWebGLFingerprint = getWebGLFingerprint;
+

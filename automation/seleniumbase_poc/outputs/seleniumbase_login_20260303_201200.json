@@ -1,0 +1,22 @@
+{
+  "url": "https://magnus-unix.github.io/fingerprint/login.html",
+  "username": "test",
+  "headless": false,
+  "fingerprint": {
+    "hardwareConcurrency": 10,
+    "hasChromeRuntime": false,
+    "href": "https://magnus-unix.github.io/fingerprint/test.html",
+    "language": "zh-CN",
+    "languages": [
+      "zh-CN"
+    ],
+    "platform": "MacIntel",
+    "pluginsLength": 5,
+    "title": "Traveler's Adventure (Auth Layer)",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "vendor": "Google Inc.",
+    "webdriver": false
+  },
+  "honeypot": null,
+  "timestamp": "2026-03-03T12:12:10.855096Z"
+}

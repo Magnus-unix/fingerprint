@@ -1,0 +1,37 @@
+{
+  "timestamp": "20260310_183358",
+  "url": "https://magnus-unix.github.io/fingerprint/login.html",
+  "username": "test",
+  "success": true,
+  "fingerprint": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    "webdriver": false,
+    "languages": [
+      "zh-CN"
+    ],
+    "language": "zh-CN",
+    "vendor": "Google Inc.",
+    "platform": "MacIntel",
+    "hardwareConcurrency": 10,
+    "deviceMemory": 8,
+    "maxTouchPoints": 0,
+    "hasChromeRuntime": false,
+    "pluginsLength": 5,
+    "title": "SSO统一身份认证",
+    "href": "https://magnus-unix.github.io/fingerprint/login.html",
+    "localStorage": true,
+    "sessionStorage": true
+  },
+  "honeypot": {
+    "trapRendered": false,
+    "triggered": false,
+    "triggers": [],
+    "renderedAt": null
+  },
+  "navigation": {
+    "final_url": "https://magnus-unix.github.io/fingerprint/test.html",
+    "success": true
+  },
+  "error": null,
+  "backend": "playwright_fallback"
+}

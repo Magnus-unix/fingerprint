@@ -40,7 +40,8 @@ def analyze_level3(excel_file):
 
         # 3. Timezone
         tz = str(row.get("level3_intlTimeZone", "unknown"))
-        offset = int(row.get("level3_dateTimeZoneOffset", 0) or 0)
+        raw_offset = row.get("level3_dateTimeZoneOffset")
+        offset = int(raw_offset) if pd.notna(raw_offset) else 0
         if tz == "unknown" or offset == 0:
             reasons.append("timezone info abnormal")
 

@@ -1,0 +1,11 @@
+{
+  "timestamp": "20260310_183221",
+  "url": "https://magnus-unix.github.io/fingerprint/login.html",
+  "username": "test",
+  "success": false,
+  "fingerprint": null,
+  "honeypot": null,
+  "navigation": null,
+  "error": "Page.evaluate: Execution context was destroyed, most likely because of a navigation",
+  "backend": "playwright_fallback"
+}

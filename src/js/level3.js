@@ -107,6 +107,199 @@ async function getRealtimeAudioFingerprint() {
     return Promise.race([attempt, timeout]);
 }
 
+function safeRead(fn, fallback = null) {
+    try {
+        const value = fn();
+        return value === undefined ? fallback : value;
+    } catch (e) {
+        return fallback;
+    }
+}
+
+function installLevel3LifecycleMonitors() {
+    if (window.__level3LifecycleStatsInstalled) return;
+    window.__level3LifecycleStatsInstalled = true;
+
+    window.__level3LifecycleStats = {
+        pagehideCount: 0,
+        lastPagehideAt: null,
+        asyncChallengeFinishedCount: 0,
+        lastAsyncChallengeFinishedAt: null
+    };
+
+    window.addEventListener("pagehide", () => {
+        window.__level3LifecycleStats.pagehideCount += 1;
+        window.__level3LifecycleStats.lastPagehideAt = Date.now();
+    });
+
+    window.addEventListener("asyncChallengeFinished", () => {
+        window.__level3LifecycleStats.asyncChallengeFinishedCount += 1;
+        window.__level3LifecycleStats.lastAsyncChallengeFinishedAt = Date.now();
+    });
+}
+
+function collectCanvasGetContextSignals() {
+    const result = {
+        hasCanvasElement: typeof HTMLCanvasElement !== "undefined",
+        getContextType: null,
+        context2dAvailable: false,
+        webglAvailable: false,
+        webgl2Available: false,
+        dataUrlPrefix: null,
+        canvasHashHint: null
+    };
+
+    try {
+        if (!result.hasCanvasElement) return result;
+
+        const canvas = document.createElement("canvas");
+        result.getContextType = typeof canvas.getContext;
+
+        const ctx2d = canvas.getContext("2d");
+        result.context2dAvailable = !!ctx2d;
+        result.webglAvailable = !!(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
+        result.webgl2Available = !!canvas.getContext("webgl2");
+
+        if (ctx2d) {
+            canvas.width = 240;
+            canvas.height = 80;
+            ctx2d.textBaseline = "top";
+            ctx2d.font = "16px Arial";
+            ctx2d.fillStyle = "#f60";
+            ctx2d.fillRect(10, 10, 120, 25);
+            ctx2d.fillStyle = "#069";
+            ctx2d.fillText("fp-level3-canvas", 14, 14);
+
+            const dataUrl = canvas.toDataURL();
+            result.dataUrlPrefix = dataUrl.slice(0, 30);
+            result.canvasHashHint = dataUrl.slice(-24);
+        }
+    } catch (e) {
+        result.error = String(e);
+    }
+
+    return result;
+}
+
+async function collectDeepApiSignals() {
+    const out = {
+        permissions: {
+            supported: !!(navigator.permissions && navigator.permissions.query),
+            notifications: null,
+            geolocation: null,
+            camera: null
+        },
+        mediaDevices: {
+            supported: !!(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices),
+            deviceCount: null,
+            kinds: [],
+            error: null
+        },
+        serviceWorker: {
+            supported: !!navigator.serviceWorker,
+            controller: false,
+            readyState: null,
+            scope: null,
+            error: null
+        }
+    };
+
+    try {
+        if (out.permissions.supported) {
+            out.permissions.notifications = await readPermissionState("notifications");
+            out.permissions.geolocation = await readPermissionState("geolocation");
+            out.permissions.camera = await readPermissionState("camera");
+        }
+    } catch (e) {
+        out.permissions.error = String(e);
+    }
+
+    try {
+        if (out.mediaDevices.supported) {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            out.mediaDevices.deviceCount = devices.length;
+            out.mediaDevices.kinds = Array.from(new Set(devices.map((d) => d.kind)));
+        }
+    } catch (e) {
+        out.mediaDevices.error = String(e);
+    }
+
+    try {
+        if (out.serviceWorker.supported) {
+            out.serviceWorker.controller = !!navigator.serviceWorker.controller;
+            if (navigator.serviceWorker.ready) {
+                const reg = await Promise.race([
+                    navigator.serviceWorker.ready,
+                    new Promise((resolve) => setTimeout(() => resolve(null), 250))
+                ]);
+                if (reg) {
+                    out.serviceWorker.readyState = "ready";
+                    out.serviceWorker.scope = reg.scope || null;
+                } else {
+                    out.serviceWorker.readyState = "pending_or_timeout";
+                }
+            }
+        }
+    } catch (e) {
+        out.serviceWorker.error = String(e);
+    }
+
+    return out;
+}
+
+async function readPermissionState(name) {
+    try {
+        const status = await navigator.permissions.query({ name });
+        return status ? status.state : "unknown";
+    } catch (e) {
+        return `error:${String(e)}`;
+    }
+}
+
+function collectNavigatorPrototypeSignals() {
+    const out = {
+        protoType: null,
+        constructorName: null,
+        webdriverDescriptorExists: false,
+        webdriverDescriptorConfigurable: null,
+        webdriverOnNavigator: null,
+        ownPropsSample: [],
+        suspicious: false
+    };
+
+    try {
+        const proto = Object.getPrototypeOf(navigator);
+        out.protoType = Object.prototype.toString.call(proto);
+        out.constructorName = proto && proto.constructor ? proto.constructor.name : null;
+
+        const desc = Object.getOwnPropertyDescriptor(proto, "webdriver");
+        out.webdriverDescriptorExists = !!desc;
+        out.webdriverDescriptorConfigurable = desc ? !!desc.configurable : null;
+        out.webdriverOnNavigator = safeRead(() => navigator.webdriver, null);
+
+        out.ownPropsSample = Object.getOwnPropertyNames(proto).slice(0, 20);
+
+        if (out.constructorName && out.constructorName !== "Navigator") {
+            out.suspicious = true;
+        }
+    } catch (e) {
+        out.error = String(e);
+    }
+
+    return out;
+}
+
+function collectLifecycleSignals() {
+    installLevel3LifecycleMonitors();
+    const stats = window.__level3LifecycleStats || {};
+    return {
+        pagehideCount: stats.pagehideCount || 0,
+        lastPagehideAt: stats.lastPagehideAt || null,
+        asyncChallengeFinishedCount: stats.asyncChallengeFinishedCount || 0,
+        lastAsyncChallengeFinishedAt: stats.lastAsyncChallengeFinishedAt || null
+    };
+}
+
 async function getLevel3Signals() {
     const signals = {};
 
@@ -177,6 +370,12 @@ async function getLevel3Signals() {
     // 4. Chrome DevTools 残留
     signals.hasReactDevTools = !!window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
     signals.hasDevtools = !!window.devtools;
+
+    // 5. 高级 API 与行为检测补充
+    signals.canvasGetContext = collectCanvasGetContextSignals();
+    signals.deepApi = await collectDeepApiSignals();
+    signals.navigatorPrototype = collectNavigatorPrototypeSignals();
+    signals.lifecycle = collectLifecycleSignals();
 
     return signals;
 }

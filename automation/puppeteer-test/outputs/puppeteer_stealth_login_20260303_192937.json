@@ -1,0 +1,56 @@
+{
+  "url": "https://magnus-unix.github.io/fingerprint/login.html",
+  "username": "test",
+  "headless": false,
+  "loginResult": {
+    "clicked": true,
+    "reason": "clicked"
+  },
+  "fingerprint": {
+    "webdriver": false,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "platform": "MacIntel",
+    "languages": [
+      "en-US",
+      "en"
+    ],
+    "vendor": "Google Inc.",
+    "hardwareConcurrency": 4,
+    "pluginsLength": 5,
+    "hasChromeObject": true,
+    "title": "Traveler's Adventure123",
+    "href": "https://magnus-unix.github.io/fingerprint/test.html"
+  },
+  "honeypot": null,
+  "generatedAt": "2026-03-03T11:29:42.728Z",
+  "assessment": {
+    "score": 100,
+    "level": "strong",
+    "checks": [
+      {
+        "name": "navigator.webdriver === false",
+        "pass": true
+      },
+      {
+        "name": "navigator.plugins.length > 0",
+        "pass": true
+      },
+      {
+        "name": "navigator.languages 非空",
+        "pass": true
+      },
+      {
+        "name": "window.chrome 存在",
+        "pass": true
+      },
+      {
+        "name": "登录按钮已点击",
+        "pass": true
+      },
+      {
+        "name": "未触发 honeypot",
+        "pass": true
+      }
+    ]
+  }
+}

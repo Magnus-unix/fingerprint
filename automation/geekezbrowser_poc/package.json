@@ -1,0 +1,13 @@
+{
+  "name": "geekezbrowser-poc",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "login": "node attach_login.js",
+    "login:headless": "node attach_login.js --headless"
+  },
+  "dependencies": {
+    "playwright-core": "latest"
+  }
+}

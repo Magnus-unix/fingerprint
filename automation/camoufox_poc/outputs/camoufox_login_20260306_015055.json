@@ -1,0 +1,24 @@
+{
+  "url": "https://magnus-unix.github.io/fingerprint/login.html",
+  "username": "test",
+  "headless": false,
+  "engine": "camoufox",
+  "fingerprint": {
+    "webdriver": false,
+    "languages": [
+      "en-US",
+      "en"
+    ],
+    "language": "en-US",
+    "vendor": "",
+    "platform": "MacIntel",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0",
+    "hardwareConcurrency": 10,
+    "pluginsLength": 5,
+    "hasChromeRuntime": false,
+    "title": "Traveler's Adventure123",
+    "href": "https://magnus-unix.github.io/fingerprint/test.html"
+  },
+  "honeypot": null,
+  "timestamp": "2026-03-05T17:52:09.501452Z"
+}

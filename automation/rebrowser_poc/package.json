@@ -1,0 +1,13 @@
+{
+  "name": "rebrowser-poc",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "run": "node run.js",
+    "run:headless": "node run.js --headless"
+  },
+  "dependencies": {
+    "rebrowser-puppeteer": "latest"
+  }
+}
