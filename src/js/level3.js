@@ -353,7 +353,8 @@ async function getLevel3Signals() {
     // 3. 执行上下文
     signals.requestIdleCallbackSupported = typeof requestIdleCallback === 'function';
     signals.queueMicrotaskSupported = typeof queueMicrotask === 'function';
-    signals.touchEventSupported = typeof TouchEvent !== 'undefined';
+    const maxTouchPoints = safeRead(() => Number(navigator.maxTouchPoints || 0), 0);
+    signals.touchEventSupported = ("ontouchstart" in window) || maxTouchPoints > 0;
     signals.pointerEventSupported = typeof PointerEvent !== 'undefined';
 
     // 简单测试 requestIdleCallback 是否能执行

@@ -64,7 +64,7 @@ def parse_struct(value):
     return None
 
 
-def analyze_new_level2(summary_obj, findings_obj, reasons):
+def analyze_new_level2(summary_obj, findings_obj, context_obj, reasons):
     if isinstance(summary_obj, dict):
         inconsistent_count = to_int(summary_obj.get("inconsistentCount"), default=0)
         total_checks = to_int(summary_obj.get("totalChecks"), default=0)
@@ -88,6 +88,13 @@ def analyze_new_level2(summary_obj, findings_obj, reasons):
 
         if hit_rules:
             reasons.append("inconsistent rules: " + ", ".join(sorted(set(hit_rules))[:6]))
+
+    if isinstance(context_obj, dict):
+        screen_obj = context_obj.get("screen")
+        if isinstance(screen_obj, dict) and "screenVsWindowMismatch" in screen_obj:
+            screen_mismatch = to_bool(screen_obj.get("screenVsWindowMismatch"))
+            if not screen_mismatch:
+                reasons.append("screen-window identical")
 
 
 def has_legacy_level2_fields(row):
@@ -186,7 +193,7 @@ def analyze_level2(excel_file):
         findings_obj = parse_struct(get_value(row, "findings", "level2.findings", "level2_findings", default=None))
         context_obj = parse_struct(get_value(row, "context", "level2.context", "level2_context", default=None))
 
-        analyze_new_level2(summary_obj, findings_obj, reasons)
+        analyze_new_level2(summary_obj, findings_obj, context_obj, reasons)
 
         # 新版 level2.js 返回 context/findings/summary，旧版才是平铺字段。
         has_new_level2_schema = any(

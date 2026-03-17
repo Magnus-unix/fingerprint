@@ -56,12 +56,21 @@ function buildContext(level1) {
         screen: {
             width: safeRead(() => screen.width, null),
             height: safeRead(() => screen.height, null),
+            windowInnerWidth: safeRead(() => window.innerWidth, null),
+            windowInnerHeight: safeRead(() => window.innerHeight, null),
             colorDepth: level1.screenColorDepth != null ? level1.screenColorDepth : safeRead(() => screen.colorDepth, null),
-            colorGamut: detectColorGamut()
+            colorGamut: detectColorGamut(),
+            screenVsWindowMismatch:
+                safeRead(() => screen.width, null) !== safeRead(() => window.innerWidth, null) ||
+                safeRead(() => screen.height, null) !== safeRead(() => window.innerHeight, null)
         },
         touch: {
             maxTouchPoints: level1.maxTouchPoints != null ? level1.maxTouchPoints : safeRead(() => navigator.maxTouchPoints, 0),
-            touchEventSupported: ("ontouchstart" in window)
+            touchEventSupported:
+                ("ontouchstart" in window) ||
+                (level1.maxTouchPoints != null
+                    ? Number(level1.maxTouchPoints) > 0
+                    : safeRead(() => Number(navigator.maxTouchPoints || 0) > 0, false))
         },
         hardware: {
             deviceMemory: safeRead(() => navigator.deviceMemory, null),
@@ -75,6 +84,8 @@ function runScreenChecks(ctx, out) {
     const d = ctx.uaParsed.device;
     const w = ctx.screen.width;
     const h = ctx.screen.height;
+    const ww = ctx.screen.windowInnerWidth;
+    const wh = ctx.screen.windowInnerHeight;
     const maxDim = Math.max(w || 0, h || 0);
 
     // UA Device vs Screen Resolution
@@ -100,6 +111,21 @@ function runScreenChecks(ctx, out) {
             screenWidth: w,
             screenHeight: h,
             reason
+        }));
+    }
+
+    // Screen size vs Window inner size
+    if (w == null || h == null || ww == null || wh == null) {
+        out.push(unavailable("screen_vs_window_mismatch", "screen/window size unavailable"));
+    } else {
+        const mismatch = !!ctx.screen.screenVsWindowMismatch;
+        out.push(result("screen_vs_window_mismatch", !mismatch, {
+            screenWidth: w,
+            screenHeight: h,
+            windowInnerWidth: ww,
+            windowInnerHeight: wh,
+            screenVsWindowMismatch: mismatch,
+            reason: mismatch ? "looks_plausible" : "screen and window are identical"
         }));
     }
 
