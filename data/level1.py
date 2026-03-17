@@ -125,11 +125,20 @@ def analyze_level1(excel_file):
                 reasons.append("cookie supported but disabled")
 
         if isinstance(event_trust, dict) and event_trust:
-            if not to_bool(event_trust.get("hasIsTrusted", False)):
+            has_is_trusted = to_bool(event_trust.get("hasIsTrusted", False))
+            descriptor_exists = event_trust.get("descriptorExists", None)
+
+            if not has_is_trusted:
                 reasons.append("Event.isTrusted missing")
+
+            if descriptor_exists is False:
+                reasons.append("Event.isTrusted descriptor missing")
 
             if to_bool(event_trust.get("descriptorWritable", False)):
                 reasons.append("Event.isTrusted unexpectedly writable")
+
+            if to_bool(event_trust.get("descriptorConfigurable", False)):
+                reasons.append("Event.isTrusted unexpectedly configurable")
 
             if to_bool(event_trust.get("descriptorHasSetter", False)):
                 reasons.append("Event.isTrusted unexpectedly has setter")
@@ -138,8 +147,12 @@ def analyze_level1(excel_file):
             if synthetic_is_trusted is True:
                 reasons.append("synthetic Event.isTrusted=true")
 
-            if to_bool(event_trust.get("suspicious", False)):
+            suspicious_flag = to_bool(event_trust.get("suspicious", False))
+            if suspicious_flag:
                 reasons.append("Event.isTrusted integrity suspicious")
+
+            if suspicious_flag and (not has_is_trusted) and descriptor_exists is False:
+                reasons.append("Event trust chain inconsistent")
 
         # Legacy checks: keep these for old records.
         if webdriver:

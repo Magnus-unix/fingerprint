@@ -106,16 +106,23 @@ function inspectEventTrust() {
     };
 
     try {
-        const proto = typeof Event !== "undefined" ? Event.prototype : null;
-        if (!proto) {
+        if (typeof Event === "undefined") {
             result.error = "Event prototype unavailable";
             result.suspicious = true;
             return result;
         }
 
-        const desc = Object.getOwnPropertyDescriptor(proto, "isTrusted");
+        const synthetic = new Event("click");
+        result.syntheticEventIsTrusted = safeRead(() => synthetic.isTrusted, null);
+        result.hasIsTrusted = "isTrusted" in synthetic;
+
+        let owner = synthetic;
+        let desc = null;
+        while (owner && !desc) {
+            desc = Object.getOwnPropertyDescriptor(owner, "isTrusted");
+            owner = Object.getPrototypeOf(owner);
+        }
         result.descriptorExists = !!desc;
-        result.hasIsTrusted = "isTrusted" in proto;
 
         if (desc) {
             result.descriptorWritable = desc.writable === true;
@@ -124,10 +131,7 @@ function inspectEventTrust() {
             result.descriptorHasSetter = typeof desc.set === "function";
         }
 
-        const synthetic = new Event("click");
-        result.syntheticEventIsTrusted = safeRead(() => synthetic.isTrusted, null);
-
-        if (!result.hasIsTrusted || !result.descriptorExists) {
+        if (!result.hasIsTrusted) {
             result.suspicious = true;
         }
         if (result.descriptorWritable === true || result.descriptorHasSetter) {

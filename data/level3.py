@@ -87,6 +87,26 @@ def parse_audio_values(val):
     return []
 
 
+def get_optional_bool(row, *keys):
+    for key in keys:
+        if key in row and pd.notna(row.get(key)):
+            raw = row.get(key)
+            if isinstance(raw, str) and not raw.strip():
+                continue
+            return to_bool(raw)
+    return None
+
+
+def get_level2_touch_supported(row):
+    context_obj = parse_struct(get_value(row, "level2.context", "level2_context", default=None))
+    if isinstance(context_obj, dict):
+        touch_obj = context_obj.get("touch")
+        if isinstance(touch_obj, dict) and "touchEventSupported" in touch_obj:
+            return to_bool(touch_obj.get("touchEventSupported"))
+
+    return get_optional_bool(row, "level2.touchEventSupported", "level2_touchEventSupported")
+
+
 def analyze_level3(excel_file):
     df = pd.read_excel(excel_file).fillna("")
     results = []
@@ -161,6 +181,22 @@ def analyze_level3(excel_file):
             get_value(row, "queueMicrotaskSupported", "level3.queueMicrotaskSupported", "level3_queueMicrotaskSupported", default=False)
         ):
             reasons.append("queueMicrotask not supported")
+
+        level2_touch_supported = get_level2_touch_supported(row)
+        level3_touch_supported = get_optional_bool(
+            row,
+            "touchEventSupported",
+            "level3.touchEventSupported",
+            "level3_touchEventSupported",
+        )
+        if (
+            level2_touch_supported is not None
+            and level3_touch_supported is not None
+            and level2_touch_supported != level3_touch_supported
+        ):
+            reasons.append(
+                f"touch support mismatch (level2={level2_touch_supported}, level3={level3_touch_supported})"
+            )
 
         if to_bool(get_value(row, "hasReactDevTools", "level3.hasReactDevTools", "level3_hasReactDevTools", default=False)) or to_bool(
             get_value(row, "hasDevtools", "level3.hasDevtools", "level3_hasDevtools", default=False)
