@@ -22,6 +22,35 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function waitPostLoginStable(page) {
+  try {
+    await page.waitForFunction(
+      () => location.pathname.endsWith("/test.html"),
+      { timeout: 12000 }
+    );
+    await page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 10000 });
+    return;
+  } catch (_) {
+    // Login may fail and stay on the same page; just ensure DOM is stable enough.
+  }
+
+  await page.waitForFunction(() => document.readyState !== "loading", { timeout: 10000 });
+}
+
+async function evaluateWithRetry(page, fn) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await page.evaluate(fn);
+    } catch (err) {
+      const msg = err && err.message ? err.message : String(err);
+      if (!msg.includes("Execution context was destroyed") || attempt === 1) {
+        throw err;
+      }
+      await page.waitForFunction(() => document.readyState !== "loading", { timeout: 10000 });
+    }
+  }
+}
+
 async function main() {
   const headless = hasFlag("--headless");
   const outputDir = path.resolve(__dirname, "outputs");
@@ -50,9 +79,9 @@ async function main() {
     await page.type("#password", PASSWORD, { delay: 70 });
     await sleep(220);
     await page.click("#loginButton");
-    await sleep(2200);
+    await waitPostLoginStable(page);
 
-    const fingerprint = await page.evaluate(() => ({
+    const fingerprint = await evaluateWithRetry(page, () => ({
       webdriver: navigator.webdriver,
       userAgent: navigator.userAgent,
       platform: navigator.platform,
@@ -65,7 +94,7 @@ async function main() {
       href: location.href
     }));
 
-    const honeypot = await page.evaluate(() => window.__honeypotStats__ || null);
+    const honeypot = await evaluateWithRetry(page, () => window.__honeypotStats__ || null);
     await page.screenshot({ path: screenshotPath, fullPage: true });
 
     const result = {

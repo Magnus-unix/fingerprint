@@ -29,7 +29,8 @@ function getExecutablePath() {
 
   const defaults = [
     "/Applications/BotBrowser.app/Contents/MacOS/BotBrowser",
-    "/Applications/Bot Browser.app/Contents/MacOS/Bot Browser"
+    "/Applications/Bot Browser.app/Contents/MacOS/Bot Browser",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium"
   ];
   for (const p of defaults) {
     if (fssync.existsSync(p)) return p;

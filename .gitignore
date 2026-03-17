@@ -12,12 +12,34 @@ Desktop.ini
 .vscode/
 .idea/
 
-# Python example
+# Environment & secrets — NEVER commit these
+.env
+.env.*
+config.py
+
+# Python virtual environments (all levels)
+.venv/
+venv/
+env/
+
+**/openclaw/
+# Third-party cloned repos (have their own .git, not submodules)
+automation/scrapling/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
+# Node
 node_modules/
-# src/
+
+# Test/run outputs (screenshots, JSON results, logs)
+**/outputs/
+*.log
+
+# Build artifacts
 build.js
 ts_src/
 static/

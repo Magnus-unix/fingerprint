@@ -27,6 +27,9 @@ function getLevelOneSignals() {
             sessionStorage: inspectStorage("sessionStorage"),
             cookie: inspectCookie()
         };
+
+        // Event integrity: Event.isTrusted should be read-only and false on synthetic events.
+        signals.eventTrust = inspectEventTrust();
     } catch (e) {
         console.error("Level 1 signal collection error:", e);
     }
@@ -85,6 +88,59 @@ function inspectCookie() {
         return result;
     } catch (e) {
         result.error = String(e);
+        return result;
+    }
+}
+
+function inspectEventTrust() {
+    const result = {
+        hasIsTrusted: false,
+        descriptorExists: false,
+        descriptorWritable: null,
+        descriptorConfigurable: null,
+        descriptorHasGetter: false,
+        descriptorHasSetter: false,
+        syntheticEventIsTrusted: null,
+        suspicious: false,
+        error: null
+    };
+
+    try {
+        const proto = typeof Event !== "undefined" ? Event.prototype : null;
+        if (!proto) {
+            result.error = "Event prototype unavailable";
+            result.suspicious = true;
+            return result;
+        }
+
+        const desc = Object.getOwnPropertyDescriptor(proto, "isTrusted");
+        result.descriptorExists = !!desc;
+        result.hasIsTrusted = "isTrusted" in proto;
+
+        if (desc) {
+            result.descriptorWritable = desc.writable === true;
+            result.descriptorConfigurable = !!desc.configurable;
+            result.descriptorHasGetter = typeof desc.get === "function";
+            result.descriptorHasSetter = typeof desc.set === "function";
+        }
+
+        const synthetic = new Event("click");
+        result.syntheticEventIsTrusted = safeRead(() => synthetic.isTrusted, null);
+
+        if (!result.hasIsTrusted || !result.descriptorExists) {
+            result.suspicious = true;
+        }
+        if (result.descriptorWritable === true || result.descriptorHasSetter) {
+            result.suspicious = true;
+        }
+        if (result.syntheticEventIsTrusted === true) {
+            result.suspicious = true;
+        }
+
+        return result;
+    } catch (e) {
+        result.error = String(e);
+        result.suspicious = true;
         return result;
     }
 }

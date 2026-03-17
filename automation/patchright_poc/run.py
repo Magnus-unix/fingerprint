@@ -11,6 +11,28 @@ from patchright.sync_api import Error, TimeoutError, sync_playwright
 DEFAULT_URL = "https://magnus-unix.github.io/fingerprint/login.html"
 
 
+def _wait_post_login_stable(page) -> None:
+    """Wait until post-login navigation settles (if any)."""
+    try:
+        page.wait_for_url("**/test.html", timeout=12000)
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
+        return
+    except TimeoutError:
+        # Login may fail and stay on current page; still wait for a stable DOM.
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
+
+
+def _evaluate_with_retry(page, script: str):
+    """Retry evaluate once when execution context is destroyed by navigation."""
+    for attempt in range(2):
+        try:
+            return page.evaluate(script)
+        except Error as e:
+            if "Execution context was destroyed" not in str(e) or attempt == 1:
+                raise
+            page.wait_for_load_state("domcontentloaded", timeout=10000)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Patchright anti-detect login PoC")
     parser.add_argument("--url", default=DEFAULT_URL, help="登录页 URL")
@@ -80,9 +102,10 @@ def run_once(
             page.fill("#password", password)
             time.sleep(0.3)
             page.click("#loginButton")
-            time.sleep(2.0)
+            _wait_post_login_stable(page)
 
-            fingerprint = page.evaluate(
+            fingerprint = _evaluate_with_retry(
+                page,
                 """
                 () => ({
                     webdriver: navigator.webdriver,
@@ -99,7 +122,7 @@ def run_once(
                 })
                 """
             )
-            honeypot = page.evaluate("() => window.__honeypotStats__ || null")
+            honeypot = _evaluate_with_retry(page, "() => window.__honeypotStats__ || null")
 
             page.screenshot(path=str(screenshot_path), full_page=True)
 

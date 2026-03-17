@@ -15,6 +15,8 @@
 
 ```bash
 export BOTBROWSER_EXEC_PATH="/Applications/BotBrowser.app/Contents/MacOS/BotBrowser"
+# 如果你当前安装的是 Chromium.app，可使用：
+# export BOTBROWSER_EXEC_PATH="/Applications/Chromium.app/Contents/MacOS/Chromium"
 # 可选：如果你有 bot profile 文件
 export BOTBROWSER_PROFILE_PATH="/Users/magnus/project/fingerprint/automation/botbrowser_poc/chrome145_mac_arm64.enc"
 ```
